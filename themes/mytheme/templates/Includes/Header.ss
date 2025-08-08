@@ -111,6 +111,7 @@
 			<% if $IsLoggedIn %>
 				<!-- Jika sudah login -->
 				<li><a class="dropdown-item" href="$BaseHref/profile">Profile</a></li>
+				<li><a class="dropdown-item" href="$BaseHref/order">Order</a></li>
 				<li><hr class="dropdown-divider"></li>
 				<li><a class="dropdown-item" href="$BaseHref/Security/logout">Logout</a></li>
 			<% else %>

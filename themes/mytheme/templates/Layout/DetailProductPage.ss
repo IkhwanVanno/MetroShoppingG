@@ -51,11 +51,23 @@
         <div class="d-flex flex-wrap gap-2">
             <a href="$BaseHref/favorite/add/$Product.ID" class="btn btn-danger flex-fill">+ Favorite</a>
             <a href="$BaseHref/cart/add/$Product.ID" class="btn btn-primary flex-fill">+ Cart</a>
-            <button class="btn btn-success flex-fill">Buy Now</button>
+            <button class="btn btn-success flex-fill">Checkout</button>
         </div>
     </div>
     <% end_if %>
     </div>
+
+    <!-- Product Description -->
+    <% if Product %>
+    <div class="mt-5 border rounded p-4 bg-light">
+        <h5 class="mb-3">Deskripsi Produk</h5>
+        <% if $Product.Description %>
+            <p class="mb-0" style="white-space: pre-line;">$Product.Description</p>
+        <% else %>
+            <p class="text-muted mb-0">Belum ada deskripsi produk.</p>
+        <% end_if %>
+    </div>
+    <% end_if %>
 
     <hr class="my-5" />
 

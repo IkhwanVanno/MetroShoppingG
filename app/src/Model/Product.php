@@ -3,6 +3,7 @@
 use SilverStripe\AssetAdmin\Forms\UploadField;
 use SilverStripe\Assets\Image;
 use SilverStripe\Forms\DropdownField;
+use SilverStripe\Forms\TextareaField;
 use SilverStripe\Forms\TextField;
 use SilverStripe\ORM\DataObject;
 
@@ -12,8 +13,10 @@ class Product extends DataObject
     private static $db = [
         "Name" => "Varchar(50)",
         "Stok" => "Int",
+        "Weight" => "Int",
         "Price" => "Double",
         "DiscountPrice" => "Double",
+        "Description" => "Varchar(255)",
     ];
     private static $has_one = [
         "Image" => Image::class,
@@ -27,12 +30,14 @@ class Product extends DataObject
         "Review" => Review::class,
         "Favorite" => Favorite::class,
         "CartItem" => CartItem::class,
+        "OrderItem" => OrderItem::class,
     ];
     private static $summary_fields = [
         'Name' => 'Name',
         'Category.Name' => 'Category',
         'EventShop.Name' => 'Event',
         'Stok' => 'Stok',
+        'Weight' => 'Weight',
         'numberFormat' => 'Price',
         'discountNumberFormat' => 'Discount Price',
         'DisplayPrice' => 'After Discount',
@@ -111,12 +116,14 @@ class Product extends DataObject
         $fields = parent::getCMSFields();
         $fields->addFieldToTab('Root.Main', TextField::create('Name', 'Product Name'));
         $fields->addFieldToTab('Root.Main', TextField::create('Stok', 'Stock'));
+        $fields->addFieldToTab('Root.Main', TextField::create('Weight', 'Weight'));
         $fields->addFieldToTab('Root.Main', TextField::create('Price', 'Price'));
         $fields->addFieldToTab('Root.Main', TextField::create('DiscountPrice', 'Discount Price'));
         $fields->addFieldToTab('Root.Main', UploadField::create('Image', 'Image'));
         $fields->addFieldToTab('Root.Main', DropdownField::create('CategoryID', 'Category')
             ->setSource(Category::get()->map('ID', 'Name'))
             ->setEmptyString('Select a Category'));
+        $fields->addFieldToTab('Root.Main', TextareaField::create('Description', 'Description'));
         return $fields;
     }
 }
