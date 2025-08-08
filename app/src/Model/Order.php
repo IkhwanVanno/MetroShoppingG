@@ -8,11 +8,11 @@ class Order extends DataObject
     private static $table_name = "order";
     private static $db = [
         "OrderCode" => "Varchar(255)",
-        "Status" => "Enum('pending,paid,shipped,completed,cancelled','pending')",
+        "Status" => "Enum('pending,paid,shipped,completed,cancelled', 'pending')",
         "TotalPrice" => "Double",
         "ShippingCost" => "Double",
         "PaymentMethod" => "Varchar(255)",
-        "PaymentStatus" => "Enum('unpaid', 'paid', 'failed')",
+        "PaymentStatus" => "Enum('unpaid,paid,failed', 'unpaid')",
         "ShippingCourier" => "Varchar(255)",
         "TrackingNumber" => "Varchar(255)",
         "CreateAt" => "Datetime",

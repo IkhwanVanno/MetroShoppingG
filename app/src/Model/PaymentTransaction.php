@@ -7,7 +7,7 @@ class PaymentTransaction extends DataObject
     private static $table_name = "paymenttransaction";
     private static $db = [
         "PaymentGateway" => "Varchar(255)",
-        "TransactionID" => "varchar(255)",
+        "TransactionID" => "Varchar(255)",
         "Amount" => "Double",
         "Status" => "Enum('pending,success,failed','pending')",
         "ResponseData" => "Text",
