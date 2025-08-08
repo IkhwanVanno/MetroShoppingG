@@ -9,7 +9,6 @@
                 <div class="card-body">
                     <!-- Desktop Header -->
                     <div class="row fw-bold d-none d-md-flex mb-2">
-                        <div class="col-md-1">Select</div>
                         <div class="col-md-5">Product</div>
                         <div class="col-md-2 text-center">Price</div>
                         <div class="col-md-2 text-center">Quantity</div>
@@ -20,9 +19,6 @@
                     <% loop CartItems %>
                     <div class="border rounded p-3 mb-3">
                         <div class="row align-items-center">
-                            <div class="col-12 col-md-1 mb-2 mb-md-0 text-center">
-                                <input type="checkbox" class="form-check-input" />
-                            </div>
                             <div class="col-12 col-md-5 d-flex gap-3 align-items-start">
                                 <a href="$BaseHref/list-product-page/view/$Product.ID" class="text-decoration-none text-black">
                                 <% if $Product.Image %>
