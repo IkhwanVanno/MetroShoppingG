@@ -1,4 +1,4 @@
-<main class="container py-4">
+<main class="container py-5">
     <h3 class="mb-4">Shopping Cart</h3>
 
     <% if CartItems && CartItems.Count > 0 %>

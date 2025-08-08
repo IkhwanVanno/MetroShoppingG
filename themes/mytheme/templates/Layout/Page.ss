@@ -1,4 +1,4 @@
-<main class="container my-5">
+<main class="container py-5">
 	<!-- section carausel -->
 	<section class="container-fluid px-0">
 	<div
@@ -97,17 +97,24 @@
 
 	<!-- Event Images -->
 	<div class="row mt-5">
-		<% loop EventShop.Limit(2) %>
-			<div class="col-12 col-md-6 position-relative overflow-hidden border" style="height: 250px">
-			<a href="$Link">
-			<img
-				src="$Image.URL"
-				alt="Event Image"
-				class="img-fluid w-100 h-100"
-				style="object-fit: cover"
-			/></a>
-			</div>
-		<% end_loop %>
+	<% loop EventShop.Limit(2) %>
+		<div class="col-12 col-md-6 position-relative overflow-hidden" style="height: 250px">
+			<a href="$BaseHref/event/$ID" class="text-decoration-none">
+				<% if $Image %>
+					<img
+						src="$Image.URL"
+						alt="$Name"
+						class="img-fluid w-100 h-100"
+						style="object-fit: cover"
+					/>
+				<% else %>
+					<div class="d-flex align-items-center justify-content-center h-100 bg-light">
+						<span class="text-muted">No Image Available</span>
+					</div>
+				<% end_if %>
+			</a>
+		</div>
+	<% end_loop %>
 	</div>
 	</section>
 

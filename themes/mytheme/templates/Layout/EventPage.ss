@@ -1,10 +1,29 @@
 <main class="container py-5">
-    <!-- Product Grid -->
+    <% if EventShop %>
+    <!-- Banner Event -->
+    <div class="container-fluid p-0">
+    <img
+        src="$EventShop.Image.URL"
+        class="img-fluid w-100"
+        alt="Banner Event"
+    />
+    </div>
+
+    <!-- Info Event -->
+    <div class="container py-5">
+    <h2 class="mb-3">$EventShop.Name</h2>
+    <p class="text-muted">Start: $EventShop.StartDate, End: $EventShop.EndDate </p>
+    <p>$EventShop.Description</p>
+    </div>
+
+    <!-- Produk Terkait Event -->
+    <div class="container pb-5">
+    <h4 class="mb-4">Product Event</h4>
     <div class="row row-cols-2 row-cols-sm-3 row-cols-md-4 row-cols-lg-5 g-4">
-        <% loop $FilteredProducts %>
+        <% loop $EventShop.Product %>
             <!-- Product Card -->
             <div class="col">
-                <a href="{$Up.Link}/view/{$ID}" class="text-decoration-none" >
+                <a href="{$BaseHref}list-product-page/view/{$ID}" class="text-decoration-none" >
                 <div class="card h-100 position-relative" style="flex: 1 1 150px; max-width: 100%">
                     <% if $hasDiscount %>
                     <span class="badge bg-danger position-absolute" style="top: 5px; left: 5px; z-index: 1; font-size: 0.6rem;">
@@ -54,14 +73,7 @@
                 </a>
             </div>
         <% end_loop %>
-
-        <% if not $FilteredProducts %>
-        <div class="col-12">
-            <div class="alert alert-info text-center">
-                <h5>No products found</h5>
-                <p class="mb-0">No products available in this category or products are out of stock.</p>
-            </div>
-        </div>
-        <% end_if %>
     </div>
+    </div>
+    <% end_if %>
 </main>

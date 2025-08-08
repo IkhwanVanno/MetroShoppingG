@@ -31,6 +31,7 @@ class Product extends DataObject
     private static $summary_fields = [
         'Name' => 'Name',
         'Category.Name' => 'Category',
+        'EventShop.Name' => 'Event',
         'Stok' => 'Stok',
         'numberFormat' => 'Price',
         'discountNumberFormat' => 'Discount Price',
