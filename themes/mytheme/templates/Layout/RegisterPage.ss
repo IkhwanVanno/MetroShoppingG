@@ -32,7 +32,7 @@
     <button type="submit" class="btn btn-success w-100 mb-3">Register</button>
     
     <div class="text-center">
-      <p class="mb-0">Already have an account? <a href="/auth-page/login">Login here</a></p>
+      <p class="mb-0">Already have an account? <a href="$BaseHref/auth-page/login">Login here</a></p>
     </div>
   </form>
 </main>

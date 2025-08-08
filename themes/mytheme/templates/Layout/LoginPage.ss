@@ -20,7 +20,7 @@
     <button type="submit" class="btn btn-primary w-100">Login</button>
     
     <div class="text-center mt-3">
-      <p class="mb-0">Don't have an account? <a href="/auth-page/register">Register here</a></p>
+      <p class="mb-0">Don't have an account? <a href="$BaseHref/auth-page/register">Register here</a></p>
     </div>
   </form>
 </main>

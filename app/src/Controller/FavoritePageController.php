@@ -21,7 +21,7 @@ class FavoritePageController extends PageController
     public function index(HTTPRequest $request)
     {
         if (!$this->isLoggedIn()) {
-            return $this->redirect('/auth-page/login');
+            return $this->redirect('$BaseHref/auth-page/login');
         }
 
         $user = $this->getCurrentUser();
@@ -38,7 +38,7 @@ class FavoritePageController extends PageController
     public function add(HTTPRequest $request)
     {
         if (!$this->isLoggedIn()) {
-            return $this->redirect('/auth-page/login');
+            return $this->redirect('$BaseHref/auth-page/login');
         }
 
         $productID = $request->param('ID');
@@ -67,7 +67,7 @@ class FavoritePageController extends PageController
     public function remove(HTTPRequest $request)
     {
         if (!$this->isLoggedIn()) {
-            return $this->redirect('/auth-page/login');
+            return $this->redirect('$BaseHref/auth-page/login');
         }
 
         $favoriteID = $request->param('ID');

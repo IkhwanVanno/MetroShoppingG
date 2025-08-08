@@ -13,4 +13,16 @@ class CartItem extends DataObject
         "Product" => Product::class,
         "Member" => Member::class,
     ];
+    public function getSubtotal()
+    {
+        if ($this->Product()->hasDiscount()) {
+            return $this->Product()->getDisplayPriceValue() * $this->Quantity;
+        } else {
+            return $this->Product()->Price * $this->Quantity;
+        }
+    }
+    public function getFormattedSubtotal()
+    {
+        return 'Rp ' . number_format($this->getSubtotal(), 0, '.', '.');
+    }
 }

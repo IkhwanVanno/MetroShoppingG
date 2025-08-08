@@ -104,15 +104,13 @@
 			<button class="btn btn-outline-secondary dropdown-toggle d-flex align-items-center gap-2" type="button" id="userDropdown" data-bs-toggle="dropdown" aria-expanded="false">
 			<img src="$resourceURL('themes/mytheme/images/User.png')" alt="User" width="24" height="24" />
 			<% if $IsLoggedIn %>
-				<span class="d-none d-sm-inline">$CurrentUser.Username</span>
+				<span class="d-none d-sm-inline">$CurrentUser.FirstName</span>
 			<% end_if %>
 			</button>
 			<ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userDropdown">
 			<% if $IsLoggedIn %>
 				<!-- Jika sudah login -->
 				<li><a class="dropdown-item" href="$BaseHref/profile">Profile</a></li>
-				<li><a class="dropdown-item" href="$BaseHref/cart">Keranjang ($CartItemCount)</a></li>
-				<li><a class="dropdown-item" href="$BaseHref/favorite">Favorit ($FavoriteCount)</a></li>
 				<li><hr class="dropdown-divider"></li>
 				<li><a class="dropdown-item" href="$BaseHref/Security/logout">Logout</a></li>
 			<% else %>
@@ -126,5 +124,5 @@
 
 	</nav>
 	</section>
-	<% include Navigation %>
+	<%-- <% include Navigation %> --%>
 </Header>

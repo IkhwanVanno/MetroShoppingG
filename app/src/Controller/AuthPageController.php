@@ -26,7 +26,7 @@ class AuthPageController extends PageController
             $result = $this->processLogin($request);
 
             if ($result->isValid()) {
-                return $this->redirect('/');
+                return $this->redirect('$BaseHref');
             }
         }
 
@@ -43,7 +43,7 @@ class AuthPageController extends PageController
             $result = $this->processRegister($request);
 
             if ($result->isValid()) {
-                return $this->redirect('/');
+                return $this->redirect('$BaseHref');
             }
         }
 

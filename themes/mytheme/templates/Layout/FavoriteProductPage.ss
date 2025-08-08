@@ -49,7 +49,7 @@
         <div class="text-center py-5">
             <h5>No favorite products yet</h5>
             <p class="text-muted">Please add products to favorites first</p>
-            <a href="/" class="btn btn-primary">Shop Now</a>
+            <a href="$BaseHref" class="btn btn-primary">Shop Now</a>
         </div>
     <% end_if %>
 </main>

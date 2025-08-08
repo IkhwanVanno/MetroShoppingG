@@ -114,10 +114,10 @@
 
 	<!-- Get to Know Us -->
 	<div class="col-6 col-md-2">
-		<h5 class="fw-bold">Get to Know Us</h5>
+		<h5 class="fw-bold">Delivery Method</h5>
 		<ul class="list-unstyled">
-		<% loop $Menu(1) %>
-			<li>$MenuTitle.XML</li>
+		<% loop DeliveryMethod %>
+			<li>$Name</li>
 		<% end_loop %>
 		</ul>
 	</div>

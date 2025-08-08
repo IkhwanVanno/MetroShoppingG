@@ -52,17 +52,20 @@
                             </div>
                             <div class="col-6 col-md-2 text-center mt-2 mt-md-0">
                                 <small class="d-md-none">Quantity:</small><br />
-                                <span class="fw-bold">$Quantity</span>
+                                <form method="post" action="$BaseHref/cart/update-quantity" class="d-inline">
+                                    <input type="hidden" name="cartItemID" value="$ID" />
+                                    <div class="input-group input-group-sm" style="width: 100px; margin: 0 auto;">
+                                        <button type="button" class="btn btn-outline-secondary btn-sm" onclick="decreaseQuantity(this)">-</button>
+                                        <input type="number" name="quantity" value="$Quantity" min="1" max="$Product.Stok" 
+                                            class="form-control text-center" onchange="this.form.submit()" />
+                                        <button type="button" class="btn btn-outline-secondary btn-sm" onclick="increaseQuantity(this)">+</button>
+                                    </div>
+                                    <small class="text-muted">Max: $Product.Stok</small>
+                                </form>
                             </div>
                             <div class="col-12 col-md-2 text-end mt-2 mt-md-0">
                                 <small class="d-md-none">Subtotal:</small><br />
-                                <span class="fw-bold">
-                                    <% if $Product.hasDiscount %>
-                                        Rp{$Product.getDisplayPriceValue.multiply($Quantity).number_format}
-                                    <% else %>
-                                        Rp{$Product.Price.multiply($Quantity).number_format}
-                                    <% end_if %>
-                                </span>
+                                <span class="fw-bold">$FormattedSubtotal</span>
                                 <br />
                                 <a href="$BaseHref/cart/remove/$ID" class="btn btn-sm btn-outline-danger mt-1">Remove</a>
                             </div>
@@ -80,28 +83,44 @@
                     <h5 class="mb-3">Shopping Summary</h5>
                     <div class="d-flex justify-content-between mb-2">
                         <span>Total Items</span>
-                        <span>$CartItems.Count items</span>
+                        <span>$TotalItems items</span>
                     </div>
                     <div class="d-flex justify-content-between mb-3">
                         <span>Total Price</span>
-                        <span class="fw-bold text-danger">
-                            <% if CartItems.getTotalPrice %>
-                                Rp{$CartItems.getTotalPrice.number_format}
-                            <% else %>
-                                Rp0
-                            <% end_if %>
-                        </span>
+                        <span class="fw-bold text-danger">$FormattedTotalPrice</span>
                     </div>
-                    <button class="btn btn-success w-100" disabled>Checkout</button>
+                    <button class="btn btn-success w-100">Checkout</button>
                 </div>
             </div>
         </div>
     </section>
     <% else %>
-    <div class="text-center py-5">
+    <div class="text-center py-5">   
         <h5>Your cart is empty</h5>
         <p class="text-muted">Please add products to cart first</p>
-        <a href="/" class="btn btn-primary">Shop Now</a>
+        <a href="$BaseHref" class="btn btn-primary">Shop Now</a>
     </div>
     <% end_if %>
 </main>
+<script>
+function increaseQuantity(btn) {
+    const input = btn.parentNode.querySelector('input[name="quantity"]');
+    const max = parseInt(input.getAttribute('max'));
+    const current = parseInt(input.value);
+    
+    if (current < max) {
+        input.value = current + 1;
+        input.form.submit();
+    }
+}
+
+function decreaseQuantity(btn) {
+    const input = btn.parentNode.querySelector('input[name="quantity"]');
+    const current = parseInt(input.value);
+    
+    if (current > 1) {
+        input.value = current - 1;
+        input.form.submit();
+    }
+}
+</script>

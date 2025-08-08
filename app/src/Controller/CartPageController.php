@@ -7,7 +7,8 @@ class CartPageController extends PageController
     private static $allowed_actions = [
         'add',
         'remove',
-        'index'
+        'index',
+        'updateQuantity',
     ];
 
     private static $url_segment = 'cart';
@@ -15,13 +16,14 @@ class CartPageController extends PageController
     private static $url_handlers = [
         'add/$ID' => 'add',
         'remove/$ID' => 'remove',
+        'update-quantity' => 'updateQuantity',
         '' => 'index'
     ];
 
     public function index(HTTPRequest $request)
     {
         if (!$this->isLoggedIn()) {
-            return $this->redirect('/auth-page/login');
+            return $this->redirect('$BaseHref/auth-page/login');
         }
 
         $user = $this->getCurrentUser();
@@ -29,7 +31,10 @@ class CartPageController extends PageController
 
         $data = array_merge($this->getCommonData(), [
             'Title' => 'Shopping Cart',
-            'CartItems' => $cartItems
+            'CartItems' => $cartItems,
+            'TotalItems' => $this->getTotalItems(),
+            'TotalPrice' => $this->getTotalPrice(),
+            'FormattedTotalPrice' => $this->getFormattedTotalPrice()
         ]);
 
         return $this->customise($data)->renderWith(['CartProductPage', 'Page']);
@@ -38,7 +43,7 @@ class CartPageController extends PageController
     public function add(HTTPRequest $request)
     {
         if (!$this->isLoggedIn()) {
-            return $this->redirect('/auth-page/login');
+            return $this->redirect('$BaseHref/auth-page/login');
         }
 
         $productID = $request->param('ID');
@@ -71,7 +76,7 @@ class CartPageController extends PageController
     public function remove(HTTPRequest $request)
     {
         if (!$this->isLoggedIn()) {
-            return $this->redirect('/auth-page/login');
+            return $this->redirect('$BaseHref/auth-page/login');
         }
 
         $cartItemID = $request->param('ID');
@@ -88,4 +93,73 @@ class CartPageController extends PageController
 
         return $this->redirectBack();
     }
+
+    public function updateQuantity(HTTPRequest $request)
+    {
+        if (!$this->isLoggedIn()) {
+            return $this->redirect('$BaseHref/auth-page/login');
+        }
+
+        if ($request->isPOST()) {
+            $cartItemID = $request->postVar('cartItemID');
+            $newQuantity = (int) $request->postVar('quantity');
+            $user = $this->getCurrentUser();
+
+            $cartItem = CartItem::get()->filter([
+                'ID' => $cartItemID,
+                'MemberID' => $user->ID
+            ])->first();
+
+            if ($cartItem && $newQuantity > 0) {
+                // Cek apakah quantity tidak melebihi stok
+                if ($newQuantity <= $cartItem->Product()->Stok) {
+                    $cartItem->Quantity = $newQuantity;
+                    $cartItem->write();
+                }
+            }
+        }
+
+        return $this->redirectBack();
+    }
+
+    public function getTotalItems()
+    {
+        if (!$this->isLoggedIn()) {
+            return 0;
+        }
+
+        $user = $this->getCurrentUser();
+        $cartItems = CartItem::get()->filter('MemberID', $user->ID);
+
+        $totalItems = 0;
+        foreach ($cartItems as $item) {
+            $totalItems += $item->Quantity;
+        }
+
+        return $totalItems;
+    }
+
+    public function getTotalPrice()
+    {
+        if (!$this->isLoggedIn()) {
+            return 0;
+        }
+
+        $user = $this->getCurrentUser();
+        $cartItems = CartItem::get()->filter('MemberID', $user->ID);
+
+        $totalPrice = 0;
+        foreach ($cartItems as $item) {
+            $totalPrice += $item->getSubtotal();
+        }
+
+        return $totalPrice;
+    }
+
+    public function getFormattedTotalPrice()
+    {
+        return 'Rp ' . number_format($this->getTotalPrice(), 0, '.', '.');
+    }
+
+
 }
