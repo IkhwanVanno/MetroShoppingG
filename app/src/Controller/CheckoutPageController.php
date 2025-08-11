@@ -1,6 +1,8 @@
 <?php
 
 use SilverStripe\Control\HTTPRequest;
+use SilverStripe\Control\HTTPResponse;
+use SilverStripe\SiteConfig\SiteConfig;
 
 class CheckoutPageController extends PageController
 {
@@ -9,7 +11,11 @@ class CheckoutPageController extends PageController
         "detailAlamat",
         "processOrder",
         "addAddress",
-        "updateAddress"
+        "updateAddress",
+        "getProvinces",
+        "getCities",
+        "getDistricts",
+        "checkOngkir"
     ];
 
     private static $url_segment = "checkout";
@@ -19,6 +25,10 @@ class CheckoutPageController extends PageController
         'process-order' => 'processOrder',
         'add-address' => 'addAddress',
         'update-address' => 'updateAddress',
+        'api/provinces' => 'getProvinces',
+        'api/cities/$ID' => 'getCities',
+        'api/districts/$ID' => 'getDistricts',
+        'api/check-ongkir' => 'checkOngkir',
         '' => 'index'
     ];
 
@@ -64,6 +74,56 @@ class CheckoutPageController extends PageController
         return $this->customise($data)->renderWith(['DetailAlamatPage', 'Page']);
     }
 
+    public function getProvinces(HTTPRequest $request)
+    {
+        $rajaOngkir = new RajaOngkirService();
+        $provinces = $rajaOngkir->getProvinces();
+        
+        return HTTPResponse::create(json_encode($provinces), 200)
+            ->addHeader('Content-Type', 'application/json');
+    }
+
+    public function getCities(HTTPRequest $request)
+    {
+        $provinceId = $request->param('ID');
+        $rajaOngkir = new RajaOngkirService();
+        $cities = $rajaOngkir->getCities($provinceId);
+        
+        return HTTPResponse::create(json_encode($cities), 200)
+            ->addHeader('Content-Type', 'application/json');
+    }
+
+    public function getDistricts(HTTPRequest $request)
+    {
+        $cityId = $request->param('ID');
+        $rajaOngkir = new RajaOngkirService();
+        $districts = $rajaOngkir->getDistricts($cityId);
+        
+        return HTTPResponse::create(json_encode($districts), 200)
+            ->addHeader('Content-Type', 'application/json');
+    }
+
+    public function checkOngkir(HTTPRequest $request)
+    {
+        if ($request->isPOST()) {
+            $siteConfig = SiteConfig::current_site_config();
+            $origin = $siteConfig->CompanyDistricID;
+            
+            $destination = $request->postVar('district_id');
+            $weight = $request->postVar('weight');
+            $courier = $request->postVar('courier');
+            
+            $rajaOngkir = new RajaOngkirService();
+            $ongkir = $rajaOngkir->checkOngkir($origin, $destination, $weight, $courier);
+            
+            return HTTPResponse::create(json_encode($ongkir), 200)
+                ->addHeader('Content-Type', 'application/json');
+        }
+        
+        return HTTPResponse::create('{"error": "Method not allowed"}', 405)
+            ->addHeader('Content-Type', 'application/json');
+    }
+
     public function addAddress(HTTPRequest $request)
     {
         if (!$this->isLoggedIn()) {
@@ -78,8 +138,11 @@ class CheckoutPageController extends PageController
             $shippingAddress->ReceiverName = $request->postVar('receiverName');
             $shippingAddress->PhoneNumber = $request->postVar('phoneNumber');
             $shippingAddress->Address = $request->postVar('address');
+            $shippingAddress->ProvinceName = $request->postVar('provinceName');
             $shippingAddress->ProvinceID = $request->postVar('provinceID');
+            $shippingAddress->CityName = $request->postVar('cityName');
             $shippingAddress->CityID = $request->postVar('cityID');
+            $shippingAddress->DistrictName = $request->postVar('districtName');
             $shippingAddress->SubDistricID = $request->postVar('subDistricID');
             $shippingAddress->PostalCode = $request->postVar('postalCode');
             $shippingAddress->write();
@@ -107,8 +170,11 @@ class CheckoutPageController extends PageController
                 $shippingAddress->ReceiverName = $request->postVar('receiverName');
                 $shippingAddress->PhoneNumber = $request->postVar('phoneNumber');
                 $shippingAddress->Address = $request->postVar('address');
+                $shippingAddress->ProvinceName = $request->postVar('provinceName');
                 $shippingAddress->ProvinceID = $request->postVar('provinceID');
+                $shippingAddress->CityName = $request->postVar('cityName');
                 $shippingAddress->CityID = $request->postVar('cityID');
+                $shippingAddress->DistrictName = $request->postVar('districtName');
                 $shippingAddress->SubDistricID = $request->postVar('subDistricID');
                 $shippingAddress->PostalCode = $request->postVar('postalCode');
                 $shippingAddress->write();
