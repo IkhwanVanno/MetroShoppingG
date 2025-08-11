@@ -10,6 +10,7 @@ class ShippingAddress extends DataObject
         "ReceiverName" => "Varchar(255)",
         "PhoneNumber" => "Varchar(20)",
         "Address" => "Text",
+        "SubDistricID"=> "Int",
         "CityID" => "Int",
         "ProvinceID" => "Int",
         "PostalCode" => "Varchar(10)",

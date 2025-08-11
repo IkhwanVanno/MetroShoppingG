@@ -51,7 +51,6 @@
         <div class="d-flex flex-wrap gap-2">
             <a href="$BaseHref/favorite/add/$Product.ID" class="btn btn-danger flex-fill">+ Favorite</a>
             <a href="$BaseHref/cart/add/$Product.ID" class="btn btn-primary flex-fill">+ Cart</a>
-            <button class="btn btn-success flex-fill">Checkout</button>
         </div>
     </div>
     <% end_if %>

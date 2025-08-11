@@ -85,7 +85,7 @@
                         <span>Total Price</span>
                         <span class="fw-bold text-danger">$FormattedTotalPrice</span>
                     </div>
-                    <button class="btn btn-success w-100">Checkout</button>
+                    <a href="$BaseHref/checkout" class="btn btn-success w-100">Checkout</a>
                 </div>
             </div>
         </div>

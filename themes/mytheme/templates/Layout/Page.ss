@@ -138,7 +138,7 @@
 			<div>
 				<ul class="nav justify-content-center mb-4 flex-wrap">
 					<li class="nav-item">
-						<a class="nav-link active text-secondary-emphasis" href="/list-product-page">See all products</a>
+						<a class="nav-link active text-secondary-emphasis" href="$BaseHref/list-product-page">See all products</a>
 					</li>
 				</ul>
 			</div>
@@ -228,7 +228,7 @@
 			<div>
 				<ul class="nav justify-content-center mb-4 flex-wrap">
 					<li class="nav-item">
-						<a class="nav-link active text-secondary-emphasis" href="/list-product-page">See all products</a>
+						<a class="nav-link active text-secondary-emphasis" href="$BaseHref/list-product-page">See all products</a>
 					</li>
 				</ul>
 			</div>
