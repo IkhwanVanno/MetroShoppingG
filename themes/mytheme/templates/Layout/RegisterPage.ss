@@ -1,5 +1,5 @@
 <main class="d-flex justify-content-center align-items-center" style="min-height: 100vh;">
-  <form action="$BaseHref/auth-page/register" method="POST" class="w-100 p-4 border rounded shadow-sm" style="max-width: 500px;">
+  <form action="$BaseHref/auth/register" method="POST" class="w-100 p-4 border rounded shadow-sm" style="max-width: 500px;">
     <h4 class="mb-3">Register</h4>
 
     <div class="row">
@@ -32,7 +32,7 @@
     <button type="submit" class="btn btn-success w-100 mb-3">Register</button>
     
     <div class="text-center">
-      <p class="mb-0">Already have an account? <a href="$BaseHref/auth-page/login">Login here</a></p>
+      <p class="mb-0">Already have an account? <a href="$BaseHref/auth/login">Login here</a></p>
     </div>
   </form>
 </main>

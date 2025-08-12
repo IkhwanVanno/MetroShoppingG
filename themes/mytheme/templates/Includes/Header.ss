@@ -21,7 +21,7 @@
 
 		<!-- Search bar -->
 		<div class="col-12 col-md-6">
-		<form role="search" action="$BaseHref/list-product-page" method="GET">
+		<form role="search" action="$BaseHref/list-product" method="GET">
 			<div class="input-group">
 			<input
 				type="text"
@@ -47,9 +47,9 @@
 				<% end_if %>
 			</button>
 			<ul class="dropdown-menu dropdown-menu-end">
-				<li><a class="dropdown-item" href="$BaseHref/list-product-page">All</a></li>
+				<li><a class="dropdown-item" href="$BaseHref/list-product">All</a></li>
 				<% loop $Category %>
-				<li><a class="dropdown-item" href="$BaseHref/list-product-page?category=$ID">$Name</a></li>
+				<li><a class="dropdown-item" href="$BaseHref/list-product?category=$ID">$Name</a></li>
 				<% end_loop %>
 			</ul>
 
@@ -78,7 +78,7 @@
 				<% end_if %>
 			</a>
 		<% else %>
-			<a href="$BaseHref/auth-page/login" class="position-relative">
+			<a href="$BaseHref/auth/login" class="position-relative">
 				<img src="$resourceURL('themes/mytheme/images/Cart.png')" alt="Cart" width="24" height="24" />
 			</a>
 		<% end_if %>
@@ -94,7 +94,7 @@
 				<% end_if %>
 			</a>
 		<% else %>
-			<a href="$BaseHref/auth-page/login" class="position-relative">
+			<a href="$BaseHref/auth/login" class="position-relative">
 				<img src="$resourceURL('themes/mytheme/images/Heart.png')" alt="Favorite" width="24" height="24" />
 			</a>
 		<% end_if %>
@@ -116,8 +116,8 @@
 				<li><a class="dropdown-item" href="$BaseHref/Security/logout">Logout</a></li>
 			<% else %>
 				<!-- Jika belum login -->
-				<li><a class="dropdown-item" href="$BaseHref/auth-page/login">Login</a></li>
-				<li><a class="dropdown-item" href="$BaseHref/auth-page/register">Register</a></li>
+				<li><a class="dropdown-item" href="$BaseHref/auth/login">Login</a></li>
+				<li><a class="dropdown-item" href="$BaseHref/auth/register">Register</a></li>
 			<% end_if %>
 			</ul>
 		</div>

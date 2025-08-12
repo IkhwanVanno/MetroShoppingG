@@ -35,7 +35,7 @@ class CheckoutPageController extends PageController
     public function index(HTTPRequest $request)
     {
         if (!$this->isLoggedIn()) {
-            return $this->redirect('$BaseHref/auth-page/login');
+            return $this->redirect('$BaseHref/auth/login');
         }
 
         $user = $this->getCurrentUser();
@@ -61,7 +61,7 @@ class CheckoutPageController extends PageController
     public function detailAlamat(HTTPRequest $request)
     {
         if (!$this->isLoggedIn()) {
-            return $this->redirect('$BaseHref/auth-page/login');
+            return $this->redirect('$BaseHref/auth/login');
         }
 
         $user = $this->getCurrentUser();
@@ -127,7 +127,7 @@ class CheckoutPageController extends PageController
     public function addAddress(HTTPRequest $request)
     {
         if (!$this->isLoggedIn()) {
-            return $this->redirect('$BaseHref/auth-page/login');
+            return $this->redirect('$BaseHref/auth/login');
         }
 
         if ($request->isPOST()) {
@@ -154,7 +154,7 @@ class CheckoutPageController extends PageController
     public function updateAddress(HTTPRequest $request)
     {
         if (!$this->isLoggedIn()) {
-            return $this->redirect('$BaseHref/auth-page/login');
+            return $this->redirect('$BaseHref/auth/login');
         }
 
         if ($request->isPOST()) {
@@ -187,7 +187,7 @@ class CheckoutPageController extends PageController
     public function processOrder(HTTPRequest $request)
     {
         if (!$this->isLoggedIn()) {
-            return $this->redirect('$BaseHref/auth-page/login');
+            return $this->redirect('$BaseHref/auth/login');
         }
 
         if ($request->isPOST()) {

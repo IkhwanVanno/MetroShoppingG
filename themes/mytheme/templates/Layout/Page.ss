@@ -138,7 +138,7 @@
 			<div>
 				<ul class="nav justify-content-center mb-4 flex-wrap">
 					<li class="nav-item">
-						<a class="nav-link active text-secondary-emphasis" href="$BaseHref/list-product-page">See all products</a>
+						<a class="nav-link active text-secondary-emphasis" href="$BaseHref/list-product">See all products</a>
 					</li>
 				</ul>
 			</div>
@@ -148,7 +148,7 @@
 		<div class="row row-cols-2 row-cols-sm-3 row-cols-md-4 row-cols-lg-5 g-4">
 			<% loop $VerticalFilteredProducts.Limit(5) %>
 				<div class="col">
-					<a href="$BaseHref/list-product-page/view/{$ID}" class="text-decoration-none" >
+					<a href="$BaseHref/list-product/view/{$ID}" class="text-decoration-none" >
 					<div class="card h-100 position-relative">
 						<% if $hasDiscount %>
 						<span class="badge bg-danger position-absolute" style="top: 5px; left: 5px; z-index: 1; font-size: 0.6rem;">
@@ -228,7 +228,7 @@
 			<div>
 				<ul class="nav justify-content-center mb-4 flex-wrap">
 					<li class="nav-item">
-						<a class="nav-link active text-secondary-emphasis" href="$BaseHref/list-product-page">See all products</a>
+						<a class="nav-link active text-secondary-emphasis" href="$BaseHref/list-product">See all products</a>
 					</li>
 				</ul>
 			</div>
@@ -238,7 +238,7 @@
 		<div class="row g-4">
 			<% loop $HorizontalFilteredProducts.Limit(3) %>
 			<div class="col-12 col-md-4">
-				<a href="$BaseHref/list-product-page/view/{$ID}" class="text-decoration-none" >
+				<a href="$BaseHref/list-product/view/{$ID}" class="text-decoration-none" >
 				<div class="card flex-row h-100 position-relative">
 					<% if $hasDiscount %>
 					<span class="badge bg-danger position-absolute" style="top: 5px; left: 5px; z-index: 1; font-size: 0.6rem;">

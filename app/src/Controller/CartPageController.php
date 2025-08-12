@@ -23,7 +23,7 @@ class CartPageController extends PageController
     public function index(HTTPRequest $request)
     {
         if (!$this->isLoggedIn()) {
-            return $this->redirect('$BaseHref/auth-page/login');
+            return $this->redirect('$BaseHref/auth/login');
         }
 
         $user = $this->getCurrentUser();
@@ -43,7 +43,7 @@ class CartPageController extends PageController
     public function add(HTTPRequest $request)
     {
         if (!$this->isLoggedIn()) {
-            return $this->redirect('$BaseHref/auth-page/login');
+            return $this->redirect('$BaseHref/auth/login');
         }
 
         $productID = $request->param('ID');
@@ -76,7 +76,7 @@ class CartPageController extends PageController
     public function remove(HTTPRequest $request)
     {
         if (!$this->isLoggedIn()) {
-            return $this->redirect('$BaseHref/auth-page/login');
+            return $this->redirect('$BaseHref/auth/login');
         }
 
         $cartItemID = $request->param('ID');
@@ -97,7 +97,7 @@ class CartPageController extends PageController
     public function updateQuantity(HTTPRequest $request)
     {
         if (!$this->isLoggedIn()) {
-            return $this->redirect('$BaseHref/auth-page/login');
+            return $this->redirect('$BaseHref/auth/login');
         }
 
         if ($request->isPOST()) {

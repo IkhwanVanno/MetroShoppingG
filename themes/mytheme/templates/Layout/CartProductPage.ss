@@ -20,7 +20,7 @@
                     <div class="border rounded p-3 mb-3">
                         <div class="row align-items-center">
                             <div class="col-12 col-md-5 d-flex gap-3 align-items-start">
-                                <a href="$BaseHref/list-product-page/view/$Product.ID" class="text-decoration-none text-black">
+                                <a href="$BaseHref/list-product/view/$Product.ID" class="text-decoration-none text-black">
                                 <% if $Product.Image %>
                                     <img src="$Product.Image.URL" class="img-thumbnail" width="80" alt="$Product.Name" />
                                 <% else %>

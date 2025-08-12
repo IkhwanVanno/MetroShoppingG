@@ -38,7 +38,7 @@
                 <!-- Actions -->
                 <div class="col-md-3 text-end pe-3">
                     <div class="d-flex flex-column gap-2">
-                        <a href="$BaseHref/list-product-page/view/$Product.ID" class="btn btn-sm btn-primary w-100">View Details</a>
+                        <a href="$BaseHref/list-product/view/$Product.ID" class="btn btn-sm btn-primary w-100">View Details</a>
                         <a href="$BaseHref/favorite/remove/$ID" class="btn btn-sm btn-outline-danger w-100">Remove</a>
                     </div>
                 </div>

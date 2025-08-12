@@ -23,7 +23,7 @@
         <% loop $EventShop.Product %>
             <!-- Product Card -->
             <div class="col">
-                <a href="{$BaseHref}list-product-page/view/{$ID}" class="text-decoration-none" >
+                <a href="{$BaseHref}list-product/view/{$ID}" class="text-decoration-none" >
                 <div class="card h-100 position-relative" style="flex: 1 1 150px; max-width: 100%">
                     <% if $hasDiscount %>
                     <span class="badge bg-danger position-absolute" style="top: 5px; left: 5px; z-index: 1; font-size: 0.6rem;">

@@ -21,7 +21,7 @@ class OrderPageController extends PageController
     public function index(HTTPRequest $request)
     {
         if (!$this->isLoggedIn()) {
-            return $this->redirect('$BaseHref/auth-page/login');
+            return $this->redirect('$BaseHref/auth/login');
         }
 
         $user = $this->getCurrentUser();
@@ -37,7 +37,7 @@ class OrderPageController extends PageController
     public function detail(HTTPRequest $request)
     {
         if (!$this->isLoggedIn()) {
-            return $this->redirect('$BaseHref/auth-page/login');
+            return $this->redirect('$BaseHref/auth/login');
         }
 
         $orderID = $request->param('ID');

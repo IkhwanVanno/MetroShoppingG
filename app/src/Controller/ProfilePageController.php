@@ -16,7 +16,7 @@ class ProfilePageController extends PageController
     public function index(HTTPRequest $request)
     {
         if (!$this->isLoggedIn()) {
-            return $this->redirect('auth-page/login');
+            return $this->redirect('auth/login');
         }
 
         if ($request->isPOST()) {
