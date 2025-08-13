@@ -1,8 +1,15 @@
 <main class="container my-4">
     <h3 class="mb-4">Checkout</h3>
     
+    <% if $Session.CheckoutError %>
+    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+        $Session.CheckoutError
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+    <% end_if %>
+    
     <% if CartItems && CartItems.Count > 0 %>
-    <form method="post" action="$BaseHref/checkout/process-order">
+    <form method="post" action="$BaseHref/checkout/process-order" id="checkoutForm">
         <!-- Alamat Pengiriman -->
         <div class="card mb-3">
             <div class="card-header fw-bold">Alamat Pengiriman</div>
@@ -61,7 +68,7 @@
                     </div>
                     <div class="col-md-4">
                         <label class="form-label">Berat Total (gram)</label>
-                        <input type="text" id="totalWeight" class="form-control" value="<% loop CartItems %>$Product.Weight<% if not $Last %> + <% end_if %><% end_loop %>" readonly>
+                        <input type="text" id="totalWeight" class="form-control" value="$TotalWeight" readonly>
                     </div>
                     <div class="col-md-4">
                         <button type="button" id="checkOngkirBtn" class="btn btn-primary mt-4">
@@ -84,12 +91,27 @@
         <div class="card mb-3">
             <div class="card-header fw-bold">Metode Pembayaran</div>
             <div class="card-body">
-            <select class="form-select">
-                <option value="">Pilih metode pembayaran</option>
-                <option value="va">Virtual Account</option>
-                <option value="ewallet">E-Wallet</option>
-                <option value="cc">Kartu Kredit/Debit</option>
-            </select>
+                <% if PaymentMethods && PaymentMethods.Count > 0 %>
+                <div class="row">
+                    <% loop PaymentMethods %>
+                    <div class="col-md-6 mb-2">
+                        <div class="form-check">
+                            <input class="form-check-input payment-method" type="radio" 
+                                   name="paymentMethod" value="$paymentMethod" 
+                                   data-fee="$totalFee" id="payment_$paymentMethod">
+                            <label class="form-check-label w-100" for="payment_$paymentMethod">
+                                <div class="d-flex justify-content-between">
+                                    <span>$paymentName</span>
+                                    <small class="text-muted">+ $formattedFee</small>
+                                </div>
+                            </label>
+                        </div>
+                    </div>
+                    <% end_loop %>
+                </div>
+                <% else %>
+                <p class="text-muted">Metode pembayaran tidak tersedia</p>
+                <% end_if %>
             </div>
         </div>
 
@@ -99,23 +121,32 @@
             <div class="card-body">
                 <div class="d-flex justify-content-between mb-2">
                     <span>Subtotal ($TotalItems items)</span>
-                    <span>$FormattedTotalPrice</span>
+                    <span id="subtotalAmount">$FormattedTotalPrice</span>
                 </div>
                 <div class="d-flex justify-content-between mb-2">
                     <span>Ongkir</span>
                     <span id="shippingCost">Rp 0</span>
                 </div>
+                <div class="d-flex justify-content-between mb-2">
+                    <span>Biaya Pembayaran</span>
+                    <span id="paymentFee">Rp 0</span>
+                </div>
                 <div class="d-flex justify-content-between fw-bold border-top pt-2">
                     <span>Total</span>
                     <span id="totalCost">$FormattedTotalPrice</span>
                 </div>
+                
                 <% if ShippingAddress %>
                     <input type="hidden" name="SecurityID" value="$SecurityID">
                     <input type="hidden" name="shippingCost" id="hiddenShippingCost" value="0">
                     <input type="hidden" name="courierService" id="hiddenCourierService" value="">
-                    <button type="submit" class="btn btn-success w-100 mt-3">Buat Pesanan</button>
+                    <button type="submit" id="submitOrderBtn" class="btn btn-success w-100 mt-3" disabled>
+                        Lanjutkan ke Pembayaran
+                    </button>
                 <% else %>
-                    <button type="button" class="btn btn-secondary w-100 mt-3" disabled>Tambahkan Alamat Terlebih Dahulu</button>
+                    <button type="button" class="btn btn-secondary w-100 mt-3" disabled>
+                        Tambahkan Alamat Terlebih Dahulu
+                    </button>
                 <% end_if %>
             </div>
         </div>
@@ -132,19 +163,14 @@
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script>
 $(document).ready(function() {
-    const basePrice = parseInt('$TotalPrice'); // Get base price from template
-    
-    // Calculate total weight
-    let totalWeight = 0;
-    <% loop CartItems %>
-    totalWeight += $Product.Weight * $Quantity;
-    <% end_loop %>
-    
-    $('#totalWeight').val(totalWeight);
+    let selectedShippingCost = 0;
+    let selectedPaymentFee = 0;
 
+    // Event handler untuk tombol cek ongkir
     $('#checkOngkirBtn').click(function() {
         const courier = $('#courierSelect').val();
         const districtId = '$ShippingAddress.SubDistricID';
+        const totalWeight = $('#totalWeight').val();
         
         if (!courier) {
             alert('Pilih kurir terlebih dahulu');
@@ -156,11 +182,12 @@ $(document).ready(function() {
             return;
         }
         
-        // Show loading state
+        // Tampilkan loading state
         $(this).prop('disabled', true);
         $(this).find('.btn-text').text('Loading...');
         $(this).find('.spinner-border').removeClass('d-none');
         
+        // Request ke server untuk cek ongkir
         $.ajax({
             url: '$BaseHref/checkout/api/check-ongkir',
             method: 'POST',
@@ -184,6 +211,7 @@ $(document).ready(function() {
         });
     });
     
+    // Fungsi untuk menampilkan hasil ongkir
     function displayOngkirResults(data) {
         const resultsDiv = $('#ongkirResults');
         const optionsDiv = $('#ongkirOptions');
@@ -215,25 +243,79 @@ $(document).ready(function() {
         }
     }
     
-    // Handle shipping option selection
+    // Event handler ketika memilih layanan pengiriman
     $(document).on('change', '.shipping-option', function() {
-        const shippingCost = parseInt($(this).val());
+        selectedShippingCost = parseInt($(this).val());
         const service = $(this).data('service');
         const description = $(this).data('description');
         const etd = $(this).data('etd');
         
-        // Update shipping cost display
-        $('#shippingCost').text('Rp ' + formatNumber(shippingCost));
-        
-        // Update total cost
-        const totalCost = basePrice + shippingCost;
-        $('#totalCost').text('Rp ' + formatNumber(totalCost));
-        
         // Update hidden fields
-        $('#hiddenShippingCost').val(shippingCost);
+        $('#hiddenShippingCost').val(selectedShippingCost);
         $('#hiddenCourierService').val(`${service} - ${description} (${etd})`);
+        
+        updateTotal();
+        checkFormValidity();
+    });
+
+    // Event handler untuk payment method
+    $(document).on('change', '.payment-method', function() {
+        selectedPaymentFee = parseInt($(this).data('fee')) || 0;
+        updateTotal();
+        checkFormValidity();
+    });
+
+    // Update total calculation
+    function updateTotal() {
+        $.ajax({
+            url: '$BaseHref/checkout/api/calculate-total',
+            method: 'POST',
+            data: {
+                shipping_cost: selectedShippingCost,
+                payment_fee: selectedPaymentFee
+            },
+            success: function(response) {
+                $('#shippingCost').text(response.formatted_shipping_cost);
+                $('#paymentFee').text(response.formatted_payment_fee);
+                $('#totalCost').text(response.formatted_total_cost);
+            },
+            error: function() {
+                console.error('Gagal menghitung total');
+            }
+        });
+    }
+
+    // Check if form is valid to enable submit button
+    function checkFormValidity() {
+        const hasShipping = selectedShippingCost > 0;
+        const hasPayment = $('input[name="paymentMethod"]:checked').length > 0;
+        
+        if (hasShipping && hasPayment) {
+            $('#submitOrderBtn').prop('disabled', false);
+        } else {
+            $('#submitOrderBtn').prop('disabled', true);
+        }
+    }
+
+    // Form validation before submit
+    $('#checkoutForm').submit(function(e) {
+        if (!$('input[name="paymentMethod"]:checked').length) {
+            e.preventDefault();
+            alert('Pilih metode pembayaran');
+            return false;
+        }
+
+        if (selectedShippingCost <= 0) {
+            e.preventDefault();
+            alert('Pilih layanan pengiriman');
+            return false;
+        }
+
+        // Show loading state on submit
+        $('#submitOrderBtn').prop('disabled', true).text('Memproses...');
     });
     
+    // Fungsi helper untuk format number
     function formatNumber(num) {
         return new Intl.NumberFormat('id-ID').format(num);
     }

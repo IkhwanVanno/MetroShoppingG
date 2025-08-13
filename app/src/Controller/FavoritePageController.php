@@ -1,5 +1,6 @@
 <?php
 
+use SilverStripe\Control\Director;
 use SilverStripe\Control\HTTPRequest;
 
 class FavoritePageController extends PageController
@@ -21,7 +22,7 @@ class FavoritePageController extends PageController
     public function index(HTTPRequest $request)
     {
         if (!$this->isLoggedIn()) {
-            return $this->redirect('$BaseHref/auth/login');
+            return $this->redirect(Director::absoluteBaseURL() . '/auth/login');
         }
 
         $user = $this->getCurrentUser();
@@ -38,7 +39,7 @@ class FavoritePageController extends PageController
     public function add(HTTPRequest $request)
     {
         if (!$this->isLoggedIn()) {
-            return $this->redirect('$BaseHref/auth/login');
+            return $this->redirect(Director::absoluteBaseURL() . '/auth/login');
         }
 
         $productID = $request->param('ID');
@@ -67,7 +68,7 @@ class FavoritePageController extends PageController
     public function remove(HTTPRequest $request)
     {
         if (!$this->isLoggedIn()) {
-            return $this->redirect('$BaseHref/auth/login');
+            return $this->redirect(Director::absoluteBaseURL() . '/auth/login');
         }
 
         $favoriteID = $request->param('ID');

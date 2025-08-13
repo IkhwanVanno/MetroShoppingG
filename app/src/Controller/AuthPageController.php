@@ -1,5 +1,6 @@
 <?php
 
+use SilverStripe\Control\Director;
 use SilverStripe\Control\HTTPRequest;
 use SilverStripe\Core\Injector\Injector;
 use SilverStripe\ORM\ValidationResult;
@@ -26,7 +27,7 @@ class AuthPageController extends PageController
             $result = $this->processLogin($request);
 
             if ($result->isValid()) {
-                return $this->redirect('$BaseHref');
+                return $this->redirect(Director::absoluteBaseURL());
             }
         }
 
@@ -43,7 +44,7 @@ class AuthPageController extends PageController
             $result = $this->processRegister($request);
 
             if ($result->isValid()) {
-                return $this->redirect('$BaseHref');
+                return $this->redirect(Director::absoluteBaseURL());
             }
         }
 

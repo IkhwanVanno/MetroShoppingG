@@ -6,6 +6,7 @@ use SilverStripe\Forms\DropdownField;
 use SilverStripe\Forms\TextareaField;
 use SilverStripe\Forms\TextField;
 use SilverStripe\ORM\DataObject;
+use SilverStripe\ORM\ArrayList;
 
 class Product extends DataObject
 {
@@ -48,6 +49,7 @@ class Product extends DataObject
     {
         return 'Rp ' . number_format($this->Price, 0, '.', '.');
     }
+
     public function discountNumberFormat()
     {
         if ($this->DiscountPrice && $this->DiscountPrice > 0) {
@@ -55,16 +57,17 @@ class Product extends DataObject
         }
         return null;
     }
+
     public function hasDiscount()
     {
         return $this->DiscountPrice && $this->DiscountPrice > 0 && $this->DiscountPrice < $this->Price;
     }
+
     public function getDiscountPercentage()
     {
         if ($this->hasDiscount()) {
             $discount = ($this->DiscountPrice / $this->Price) * 100;
             return number_format($discount, 2) . '%';
-
         }
         return null;
     }
@@ -79,6 +82,7 @@ class Product extends DataObject
 
         return 'Rp ' . number_format($finalPrice, 0, '.', '.');
     }
+
     public function getDisplayPriceValue()
     {
         if ($this->hasDiscount()) {
@@ -111,6 +115,7 @@ class Product extends DataObject
         $average = $totalRating / $reviews->count();
         return number_format($average, 1);
     }
+
     public function getCMSFields()
     {
         $fields = parent::getCMSFields();

@@ -1,5 +1,6 @@
 <?php
 
+use SilverStripe\Control\Director;
 use SilverStripe\Control\HTTPRequest;
 
 class CartPageController extends PageController
@@ -10,9 +11,7 @@ class CartPageController extends PageController
         'index',
         'updateQuantity',
     ];
-
     private static $url_segment = 'cart';
-
     private static $url_handlers = [
         'add/$ID' => 'add',
         'remove/$ID' => 'remove',
@@ -20,10 +19,14 @@ class CartPageController extends PageController
         '' => 'index'
     ];
 
+    /**
+     * Halaman utama cart.
+     * Menampilkan daftar item di keranjang user yang sedang login.
+     */
     public function index(HTTPRequest $request)
     {
         if (!$this->isLoggedIn()) {
-            return $this->redirect('$BaseHref/auth/login');
+            return $this->redirect(Director::absoluteBaseURL() . '/auth/login');
         }
 
         $user = $this->getCurrentUser();
@@ -40,10 +43,14 @@ class CartPageController extends PageController
         return $this->customise($data)->renderWith(['CartProductPage', 'Page']);
     }
 
+    /**
+     * Menambahkan produk ke cart.
+     * Jika produk sudah ada, jumlahnya ditambah 1.
+     */
     public function add(HTTPRequest $request)
     {
         if (!$this->isLoggedIn()) {
-            return $this->redirect('$BaseHref/auth/login');
+            return $this->redirect(Director::absoluteBaseURL() . '/auth/login');
         }
 
         $productID = $request->param('ID');
@@ -73,10 +80,13 @@ class CartPageController extends PageController
         return $this->redirectBack();
     }
 
+    /**
+     * Menghapus item dari cart berdasarkan ID cart item.
+     */
     public function remove(HTTPRequest $request)
     {
         if (!$this->isLoggedIn()) {
-            return $this->redirect('$BaseHref/auth/login');
+            return $this->redirect(Director::absoluteBaseURL() . '/auth/login');
         }
 
         $cartItemID = $request->param('ID');
@@ -94,10 +104,14 @@ class CartPageController extends PageController
         return $this->redirectBack();
     }
 
+    /**
+     * Mengupdate jumlah item di cart.
+     * Memastikan jumlah tidak melebihi stok produk.
+     */
     public function updateQuantity(HTTPRequest $request)
     {
         if (!$this->isLoggedIn()) {
-            return $this->redirect('$BaseHref/auth/login');
+            return $this->redirect(Director::absoluteBaseURL() . '/auth/login');
         }
 
         if ($request->isPOST()) {
@@ -122,6 +136,9 @@ class CartPageController extends PageController
         return $this->redirectBack();
     }
 
+    /**
+     * Menghitung total jumlah semua item di cart user.
+     */
     public function getTotalItems()
     {
         if (!$this->isLoggedIn()) {
@@ -139,6 +156,9 @@ class CartPageController extends PageController
         return $totalItems;
     }
 
+    /**
+     * Menghitung total harga semua item di cart user.
+     */
     public function getTotalPrice()
     {
         if (!$this->isLoggedIn()) {
@@ -156,10 +176,11 @@ class CartPageController extends PageController
         return $totalPrice;
     }
 
+    /**
+     * Memformat total harga ke format Rupiah.
+     */
     public function getFormattedTotalPrice()
     {
         return 'Rp ' . number_format($this->getTotalPrice(), 0, '.', '.');
     }
-
-
 }

@@ -1,8 +1,12 @@
 <?php
 
+use SilverStripe\Control\Director;
 use SilverStripe\Control\HTTPRequest;
 use SilverStripe\Control\HTTPResponse;
+use SilverStripe\Core\Environment;
+use SilverStripe\ORM\ArrayList;
 use SilverStripe\SiteConfig\SiteConfig;
+use SilverStripe\View\ArrayData;
 
 class CheckoutPageController extends PageController
 {
@@ -15,7 +19,8 @@ class CheckoutPageController extends PageController
         "getProvinces",
         "getCities",
         "getDistricts",
-        "checkOngkir"
+        "checkOngkir",
+        "calculateTotal"
     ];
 
     private static $url_segment = "checkout";
@@ -29,20 +34,24 @@ class CheckoutPageController extends PageController
         'api/cities/$ID' => 'getCities',
         'api/districts/$ID' => 'getDistricts',
         'api/check-ongkir' => 'checkOngkir',
+        'api/calculate-total' => 'calculateTotal',
         '' => 'index'
     ];
 
+    /**
+     * Menampilkan halaman checkout utama
+     */
     public function index(HTTPRequest $request)
     {
         if (!$this->isLoggedIn()) {
-            return $this->redirect('$BaseHref/auth/login');
+            return $this->redirect(Director::absoluteBaseURL() . '/auth/login');
         }
 
         $user = $this->getCurrentUser();
         $cartItems = CartItem::get()->filter('MemberID', $user->ID);
 
         if (!$cartItems || $cartItems->count() == 0) {
-            return $this->redirect('$BaseHref/cart');
+            return $this->redirect(Director::absoluteBaseURL() . '/cart');
         }
 
         $shippingAddress = ShippingAddress::get()->filter('MemberID', $user->ID)->first();
@@ -52,16 +61,21 @@ class CheckoutPageController extends PageController
             'ShippingAddress' => $shippingAddress,
             'TotalItems' => $this->getTotalItems(),
             'TotalPrice' => $this->getTotalPrice(),
-            'FormattedTotalPrice' => $this->getFormattedTotalPrice()
+            'FormattedTotalPrice' => $this->getFormattedTotalPrice(),
+            'TotalWeight' => $this->getTotalWeight(),
+            'PaymentMethods' => $this->getPaymentMethod(),
         ]);
 
         return $this->customise($data)->renderWith(['CheckoutPage', 'Page']);
     }
 
+    /**
+     * Menampilkan halaman detail alamat pengiriman
+     */
     public function detailAlamat(HTTPRequest $request)
     {
         if (!$this->isLoggedIn()) {
-            return $this->redirect('$BaseHref/auth/login');
+            return $this->redirect(Director::absoluteBaseURL() . '/auth/login');
         }
 
         $user = $this->getCurrentUser();
@@ -74,60 +88,110 @@ class CheckoutPageController extends PageController
         return $this->customise($data)->renderWith(['DetailAlamatPage', 'Page']);
     }
 
+    /**
+     * Mendapatkan daftar provinsi dari RajaOngkir API
+     */
     public function getProvinces(HTTPRequest $request)
     {
         $rajaOngkir = new RajaOngkirService();
         $provinces = $rajaOngkir->getProvinces();
-        
+
         return HTTPResponse::create(json_encode($provinces), 200)
             ->addHeader('Content-Type', 'application/json');
     }
 
+    /**
+     * Mendapatkan daftar kota berdasarkan province ID dari RajaOngkir API
+     */
     public function getCities(HTTPRequest $request)
     {
         $provinceId = $request->param('ID');
         $rajaOngkir = new RajaOngkirService();
         $cities = $rajaOngkir->getCities($provinceId);
-        
+
         return HTTPResponse::create(json_encode($cities), 200)
             ->addHeader('Content-Type', 'application/json');
     }
 
+    /**
+     * Mendapatkan daftar kecamatan berdasarkan city ID dari RajaOngkir API
+     */
     public function getDistricts(HTTPRequest $request)
     {
         $cityId = $request->param('ID');
         $rajaOngkir = new RajaOngkirService();
         $districts = $rajaOngkir->getDistricts($cityId);
-        
+
         return HTTPResponse::create(json_encode($districts), 200)
             ->addHeader('Content-Type', 'application/json');
     }
 
+    /**
+     * Mengecek ongkos kirim dari RajaOngkir API
+     */
     public function checkOngkir(HTTPRequest $request)
     {
         if ($request->isPOST()) {
             $siteConfig = SiteConfig::current_site_config();
             $origin = $siteConfig->CompanyDistricID;
-            
+
             $destination = $request->postVar('district_id');
             $weight = $request->postVar('weight');
             $courier = $request->postVar('courier');
-            
+
             $rajaOngkir = new RajaOngkirService();
             $ongkir = $rajaOngkir->checkOngkir($origin, $destination, $weight, $courier);
-            
+
             return HTTPResponse::create(json_encode($ongkir), 200)
                 ->addHeader('Content-Type', 'application/json');
         }
-        
+
         return HTTPResponse::create('{"error": "Method not allowed"}', 405)
             ->addHeader('Content-Type', 'application/json');
     }
 
+    /**
+     * Menghitung total keseluruhan termasuk ongkir
+     */
+    public function calculateTotal(HTTPRequest $request)
+    {
+        if (!$this->isLoggedIn()) {
+            return HTTPResponse::create('{"error": "Unauthorized"}', 401)
+                ->addHeader('Content-Type', 'application/json');
+        }
+
+        if ($request->isPOST()) {
+            $shippingCost = (int) $request->postVar('shipping_cost');
+            $paymentFee = (int) $request->postVar('payment_fee');
+            $subtotal = $this->getTotalPrice();
+            $totalCost = $subtotal + $shippingCost + $paymentFee;
+
+            $response = [
+                'subtotal' => $subtotal,
+                'formatted_subtotal' => $this->getFormattedTotalPrice(),
+                'shipping_cost' => $shippingCost,
+                'formatted_shipping_cost' => 'Rp ' . number_format($shippingCost, 0, '.', '.'),
+                'payment_fee' => $paymentFee,
+                'formatted_payment_fee' => 'Rp ' . number_format($paymentFee, 0, '.', '.'),
+                'total_cost' => $totalCost,
+                'formatted_total_cost' => 'Rp ' . number_format($totalCost, 0, '.', '.')
+            ];
+
+            return HTTPResponse::create(json_encode($response), 200)
+                ->addHeader('Content-Type', 'application/json');
+        }
+
+        return HTTPResponse::create('{"error": "Method not allowed"}', 405)
+            ->addHeader('Content-Type', 'application/json');
+    }
+
+    /**
+     * Menambahkan alamat pengiriman baru
+     */
     public function addAddress(HTTPRequest $request)
     {
         if (!$this->isLoggedIn()) {
-            return $this->redirect('$BaseHref/auth/login');
+            return $this->redirect(Director::absoluteBaseURL() . '/auth/login');
         }
 
         if ($request->isPOST()) {
@@ -148,13 +212,16 @@ class CheckoutPageController extends PageController
             $shippingAddress->write();
         }
 
-        return $this->redirect('$BaseHref/checkout/detail-alamat');
+        return $this->redirect(Director::absoluteBaseURL() . '/checkout/detail-alamat');
     }
 
+    /**
+     * Mengupdate alamat pengiriman yang sudah ada
+     */
     public function updateAddress(HTTPRequest $request)
     {
         if (!$this->isLoggedIn()) {
-            return $this->redirect('$BaseHref/auth/login');
+            return $this->redirect(Director::absoluteBaseURL() . '/auth/login');
         }
 
         if ($request->isPOST()) {
@@ -181,13 +248,16 @@ class CheckoutPageController extends PageController
             }
         }
 
-        return $this->redirect('$BaseHref/checkout/detail-alamat');
+        return $this->redirect(Director::absoluteBaseURL() . '/checkout/detail-alamat');
     }
 
+    /**
+     * Memproses pesanan dan membuat order baru
+     */
     public function processOrder(HTTPRequest $request)
     {
         if (!$this->isLoggedIn()) {
-            return $this->redirect('$BaseHref/auth/login');
+            return $this->redirect(Director::absoluteBaseURL() . '/auth/login');
         }
 
         if ($request->isPOST()) {
@@ -195,30 +265,54 @@ class CheckoutPageController extends PageController
             $cartItems = CartItem::get()->filter('MemberID', $user->ID);
 
             if (!$cartItems || $cartItems->count() == 0) {
-                return $this->redirect('$BaseHref/cart');
+                return $this->redirect(Director::absoluteBaseURL() . '/cart');
             }
 
             $shippingAddress = ShippingAddress::get()->filter('MemberID', $user->ID)->first();
             if (!$shippingAddress) {
-                return $this->redirect('$BaseHref/checkout/detail-alamat');
+                return $this->redirect(Director::absoluteBaseURL() . '/checkout/detail-alamat');
             }
 
+            $paymentMethod = $request->postVar('paymentMethod');
+            $shippingCost = (float) $request->postVar('shippingCost');
+            $courierService = $request->postVar('courierService');
+
+            if (!$paymentMethod) {
+                $this->getRequest()->getSession()->set('CheckoutError', 'Pilih metode pembayaran');
+                return $this->redirectBack();
+            }
+
+            if (!$shippingCost || !$courierService) {
+                $this->getRequest()->getSession()->set('CheckoutError', 'Pilih layanan pengiriman');
+                return $this->redirectBack();
+            }
+
+            // Hitung total
+            $subtotal = $this->getTotalPrice();
+
+            // Buat order
             $order = Order::create();
             $order->MemberID = $user->ID;
             $order->OrderCode = 'ORD-' . date('Y') . '-' . str_pad(Order::get()->count() + 1, 6, '0', STR_PAD_LEFT);
             $order->Status = 'pending';
-            $order->ShippingGoal = 0; // Will be updated when shipping is selected
-            $order->CreatedAt = date('Y-m-d H:i:s');
-            $order->UpdatedAt = date('Y-m-d H:i:s');
+            $order->TotalPrice = $subtotal;
+            $order->ShippingCost = $shippingCost;
+            $order->PaymentMethod = $paymentMethod;
+            $order->ShippingCourier = $courierService;
+            $order->PaymentStatus = 'unpaid';
+            $order->CreateAt = date('Y-m-d H:i:s');
+            $order->UpdateAt = date('Y-m-d H:i:s');
+            $order->ShippingAddressID = $shippingAddress->ID;
             $order->write();
 
+            // Buat order items
             foreach ($cartItems as $cartItem) {
                 $orderItem = OrderItem::create();
                 $orderItem->OrderID = $order->ID;
                 $orderItem->ProductID = $cartItem->ProductID;
                 $orderItem->Quantity = $cartItem->Quantity;
-                $orderItem->Price = $cartItem->Product()->Price;
-                $orderItem->SubTotal = $cartItem->getSubtotal();
+                $orderItem->Price = $cartItem->Product()->getDisplayPriceValue();
+                $orderItem->Subtotal = $cartItem->getSubtotal();
                 $orderItem->write();
             }
 
@@ -227,12 +321,16 @@ class CheckoutPageController extends PageController
                 $cartItem->delete();
             }
 
-            return $this->redirect('$BaseHref/order/detail/' . $order->ID);
+            // Redirect to payment
+            return $this->redirect(Director::absoluteBaseURL() . '/payment/initiate/' . $order->ID);
         }
 
         return $this->redirectBack();
     }
 
+    /**
+     * Menghitung total jumlah item di keranjang
+     */
     private function getTotalItems()
     {
         if (!$this->isLoggedIn()) {
@@ -250,6 +348,9 @@ class CheckoutPageController extends PageController
         return $totalItems;
     }
 
+    /**
+     * Menghitung total harga semua item di keranjang (tanpa ongkir)
+     */
     private function getTotalPrice()
     {
         if (!$this->isLoggedIn()) {
@@ -267,8 +368,52 @@ class CheckoutPageController extends PageController
         return $totalPrice;
     }
 
+    /**
+     * Mendapatkan total harga dalam format rupiah
+     */
     private function getFormattedTotalPrice()
     {
         return 'Rp ' . number_format($this->getTotalPrice(), 0, '.', '.');
+    }
+
+    /**
+     * Menghitung total berat semua item di keranjang
+     */
+    private function getTotalWeight()
+    {
+        if (!$this->isLoggedIn()) {
+            return 0;
+        }
+
+        $user = $this->getCurrentUser();
+        $cartItems = CartItem::get()->filter('MemberID', $user->ID);
+
+        $totalWeight = 0;
+        foreach ($cartItems as $item) {
+            $totalWeight += $item->Product()->Weight * $item->Quantity;
+        }
+
+        return $totalWeight;
+    }
+
+    /**
+     * Mendapatkan Payment method dari Duitku
+     */
+    private function getPaymentMethod()
+    {
+        $duitku = new DuitkuService();
+        $paymentMethods = $duitku->getPaymentMethods($this->getTotalPrice());
+
+        $methods = new ArrayList();
+        foreach ($paymentMethods as $method) {
+            $methods->push(new ArrayData([
+                'paymentMethod' => $method['paymentMethod'],
+                'paymentName' => $method['paymentName'],
+                'totalFee' => $method['totalFee'],
+                'formattedFee' => 'Rp ' . number_format($method['totalFee'], 0, '.', '.')
+            ]));
+        }
+
+        return $methods;
     }
 }
