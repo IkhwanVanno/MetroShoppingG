@@ -3,28 +3,26 @@
 use SilverStripe\Control\Director;
 use SilverStripe\Control\HTTPRequest;
 use SilverStripe\Control\HTTPResponse;
+use SilverStripe\ORM\ArrayList;
 
 class OrderPageController extends PageController
 {
     private static $allowed_actions = [
         'index',
         'detail',
-        'submitReview',
         'cancelOrder',
-        'markAsCompleted'
+        'markAsCompleted',
+        'submitReview'
     ];
 
     private static $url_handlers = [
         'detail/$ID' => 'detail',
-        'submit-review' => 'submitReview',
         'cancel/$ID' => 'cancelOrder',
         'complete/$ID' => 'markAsCompleted',
+        'review/submit/$OrderID/$OrderItemID' => 'submitReview',
         '' => 'index'
     ];
 
-    /**
-     * Show order list
-     */
     public function index(HTTPRequest $request)
     {
         if (!$this->getCurrentUser()) {
@@ -53,9 +51,6 @@ class OrderPageController extends PageController
         return $this->customise($data)->renderWith(['OrderListPage', 'Page']);
     }
 
-    /**
-     * Show order detail
-     */
     public function detail(HTTPRequest $request)
     {
         $orderID = $request->param('ID');
@@ -76,34 +71,52 @@ class OrderPageController extends PageController
 
         $order->checkAndCancelIfExpired();
 
-        $orderItems = $order->OrderItem();
+        $orderItems = OrderItem::get()->filter('OrderID', $order->ID);
         $itemsWithReviewStatus = [];
 
         foreach ($orderItems as $item) {
+            $product = Product::get()->byID($item->ProductID);
+            
+            if (!$product) {
+                continue;
+            }
+            
             $existingReview = Review::get()->filter([
                 'ProductID' => $item->ProductID,
                 'MemberID' => $this->getCurrentUser()->ID
             ])->first();
 
+            $canReview = ($order->Status == 'completed') && !$existingReview;
+            
+            $itemData = new stdClass();
+            $itemData->ID = $item->ID;
+            $itemData->ProductID = $item->ProductID;
+            $itemData->Quantity = $item->Quantity;
+            $itemData->Price = $item->Price;
+            $itemData->Subtotal = $item->Subtotal;
+            $itemData->FormattedPrice = number_format($item->Price, 0, '.', '.');
+            $itemData->FormattedSubtotal = number_format($item->Subtotal, 0, '.', '.');
+            $itemData->Product = $product;
+            
             $itemsWithReviewStatus[] = [
-                'Item' => $item,
+                'Item' => $itemData,
                 'HasReview' => $existingReview ? true : false,
-                'Review' => $existingReview
+                'Review' => $existingReview,
+                'CanReview' => $canReview
             ];
         }
 
+        $reviewStatusList = new ArrayList($itemsWithReviewStatus);
+
         $data = array_merge($this->getCommonData(), [
             'Order' => $order,
-            'OrderItemsWithReview' => $itemsWithReviewStatus,
+            'OrderItemsWithReview' => $reviewStatusList,
             'Title' => 'Detail Pesanan ' . $order->OrderCode
         ]);
 
         return $this->customise($data)->renderWith(['OrderDetailPage', 'Page']);
     }
 
-    /**
-     * Cancel order
-     */
     public function cancelOrder(HTTPRequest $request)
     {
         if (!$this->getCurrentUser()) {
@@ -130,9 +143,6 @@ class OrderPageController extends PageController
         return $this->redirect(Director::absoluteBaseURL() . '/order/detail/' . $orderID);
     }
 
-    /**
-     * Mark order as completed (for delivered orders)
-     */
     public function markAsCompleted(HTTPRequest $request)
     {
         if (!$this->getCurrentUser()) {
@@ -159,77 +169,66 @@ class OrderPageController extends PageController
         return $this->redirect(Director::absoluteBaseURL() . '/order/detail/' . $orderID);
     }
 
-    /**
-     * Submit product review
-     */
     public function submitReview(HTTPRequest $request)
     {
         if (!$this->getCurrentUser()) {
-            return HTTPResponse::create(json_encode(['error' => 'Unauthorized']), 401)
-                ->addHeader('Content-Type', 'application/json');
+            return $this->redirect(Director::absoluteBaseURL() . '/auth/login');
         }
 
-        if (!$request->isPOST()) {
-            return HTTPResponse::create(json_encode(['error' => 'Method not allowed']), 405)
-                ->addHeader('Content-Type', 'application/json');
-        }
-
-        $productID = $request->postVar('product_id');
-        $orderID = $request->postVar('order_id');
-        $rating = (int) $request->postVar('rating');
-        $message = $request->postVar('message');
-
-        // Validation
-        if (!$productID || !$orderID || !$rating || $rating < 1 || $rating > 5) {
-            return HTTPResponse::create(json_encode(['error' => 'Invalid data']), 400)
-                ->addHeader('Content-Type', 'application/json');
-        }
-
-        $user = $this->getCurrentUser();
-
-        // Check if order belongs to user and is completed
+        $orderID = $request->param('OrderID');
+        $orderItemID = $request->param('OrderItemID');
+        
         $order = Order::get()->filter([
             'ID' => $orderID,
-            'MemberID' => $user->ID,
-            'Status' => 'completed'
+            'MemberID' => $this->getCurrentUser()->ID
         ])->first();
 
-        if (!$order) {
-            return HTTPResponse::create(json_encode(['error' => 'Order not found or not completed']), 404)
-                ->addHeader('Content-Type', 'application/json');
+        if (!$order || $order->Status != 'completed') {
+            $this->getRequest()->getSession()->set('ReviewError', 'Pesanan belum selesai atau tidak dapat direview');
+            return $this->redirectBack();
         }
 
-        // Check if product is in this order
         $orderItem = OrderItem::get()->filter([
-            'OrderID' => $orderID,
-            'ProductID' => $productID
+            'ID' => $orderItemID,
+            'OrderID' => $orderID
         ])->first();
 
         if (!$orderItem) {
-            return HTTPResponse::create(json_encode(['error' => 'Product not found in order']), 404)
-                ->addHeader('Content-Type', 'application/json');
+            $this->getRequest()->getSession()->set('ReviewError', 'Item pesanan tidak ditemukan');
+            return $this->redirectBack();
         }
 
-        // Check if review already exists
         $existingReview = Review::get()->filter([
-            'ProductID' => $productID,
-            'MemberID' => $user->ID
+            'ProductID' => $orderItem->ProductID,
+            'MemberID' => $this->getCurrentUser()->ID
         ])->first();
 
         if ($existingReview) {
-            return HTTPResponse::create(json_encode(['error' => 'Review already exists']), 400)
-                ->addHeader('Content-Type', 'application/json');
+            $this->getRequest()->getSession()->set('ReviewError', 'Anda sudah memberikan review untuk produk ini');
+            return $this->redirectBack();
         }
 
-        // Create review
+        $rating = (int) $request->postVar('rating');
+        $message = trim($request->postVar('message'));
+
+        if (!$rating || $rating < 1 || $rating > 5) {
+            $this->getRequest()->getSession()->set('ReviewError', 'Rating harus antara 1-5');
+            return $this->redirectBack();
+        }
+
+        if (!$message || strlen($message) < 5) {
+            $this->getRequest()->getSession()->set('ReviewError', 'Pesan review minimal 5 karakter');
+            return $this->redirectBack();
+        }
+
         $review = Review::create();
-        $review->ProductID = $productID;
-        $review->MemberID = $user->ID;
+        $review->ProductID = $orderItem->ProductID;
+        $review->MemberID = $this->getCurrentUser()->ID;
         $review->Rating = $rating;
         $review->Message = $message;
         $review->write();
 
-        return HTTPResponse::create(json_encode(['success' => 'Review submitted successfully']), 200)
-            ->addHeader('Content-Type', 'application/json');
+        $this->getRequest()->getSession()->set('ReviewSuccess', 'Review berhasil ditambahkan');
+        return $this->redirect(Director::absoluteBaseURL() . '/order/detail/' . $orderID);
     }
 }

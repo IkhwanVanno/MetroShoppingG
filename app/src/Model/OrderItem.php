@@ -1,5 +1,6 @@
 <?php
 
+use SilverStripe\ORM\ArrayList;
 use SilverStripe\ORM\DataObject;
 
 class OrderItem extends DataObject
@@ -29,5 +30,16 @@ class OrderItem extends DataObject
     public function getFormattedSubtotal()
     {
         return number_format($this->Subtotal, 0, '.', '.');
+    }
+    /**
+     * Get range helper for templates
+     */
+    public function Range($start, $end)
+    {
+        $result = [];
+        for ($i = $start; $i <= $end; $i++) {
+            $result[] = ['Pos' => $i];
+        }
+        return new ArrayList($result);
     }
 }

@@ -1,5 +1,6 @@
 <?php
 
+use SilverStripe\ORM\ArrayList;
 use SilverStripe\ORM\DataObject;
 use SilverStripe\Security\Member;
 
@@ -29,22 +30,21 @@ class Review extends DataObject
     }
 
     /**
-     * Get star display for rating
-     */
-    public function getStarDisplay()
-    {
-        $stars = '';
-        for ($i = 1; $i <= 5; $i++) {
-            $stars .= $i <= $this->Rating ? '★' : '☆';
-        }
-        return $stars;
-    }
-
-    /**
      * Get formatted created date
      */
     public function getFormattedDate()
     {
         return date('d F Y', strtotime($this->CreatedAt));
+    }
+    /**
+     * Get range helper for templates (untuk star rating)
+     */
+    public function Range($start, $end)
+    {
+        $result = [];
+        for ($i = $start; $i <= $end; $i++) {
+            $result[] = ['Pos' => $i];
+        }
+        return new ArrayList($result);
     }
 }

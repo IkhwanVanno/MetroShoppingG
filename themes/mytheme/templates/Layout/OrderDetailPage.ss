@@ -13,6 +13,18 @@
             <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
         </div>
     <% end_if %>
+    <% if $Session.ReviewSuccess %>
+        <div class="alert alert-success alert-dismissible fade show">
+            $Session.ReviewSuccess
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    <% end_if %>
+    <% if $Session.ReviewError %>
+        <div class="alert alert-danger alert-dismissible fade show">
+            $Session.ReviewError
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    <% end_if %>
 
     <div class="row">
         <!-- Order Details -->
@@ -41,20 +53,104 @@
 
                     <hr>
                     <h6>Produk</h6>
-                    <ul class="list-group mb-3">
-                        <% loop $Order.OrderItem %>
-                            <li class="list-group-item d-flex justify-content-between align-items-center">
-                                <div class="d-flex align-items-center">
-                                    <img src="$Product.Image.URL" alt="$Product.Name" class="me-2 rounded" style="width:50px; height:50px; object-fit:cover;">
-                                    <div>
-                                        <strong>$Product.Name</strong><br>
-                                        <small>Rp $FormattedPrice x $Quantity</small>
+
+                    <% if $OrderItemsWithReview %>
+                        <ul class="list-group mb-3">
+                            <% loop $OrderItemsWithReview %>
+                                <li class="list-group-item">
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        <div class="d-flex align-items-center">
+                                            <% if $Item.Product.Image %>
+                                                <img src="$Item.Product.Image.URL" alt="$Item.Product.Name" class="me-2 rounded" style="width:50px; height:50px; object-fit:cover;">
+                                            <% else %>
+                                                <div class="me-2 bg-light rounded d-flex align-items-center justify-content-center" style="width:50px; height:50px;">
+                                                    <small class="text-muted">No Image</small>
+                                                </div>
+                                            <% end_if %>
+                                            <div>
+                                                <strong>$Item.Product.Name</strong><br>
+                                                <small>Rp $Item.FormattedPrice x $Item.Quantity</small>
+                                            </div>
+                                        </div>
+                                        <span>Rp $Item.FormattedSubtotal</span>
                                     </div>
-                                </div>
-                                <span>Rp $FormattedSubtotal</span>
-                            </li>
-                        <% end_loop %>
-                    </ul>
+
+                                    <% if $HasReview %>
+                                        <!-- Review yang sudah ada -->
+                                        <div class="mt-3 p-3 bg-light rounded">
+                                            <h6 class="mb-2">Review Anda:</h6>
+                                            <div class="mb-2">
+                                                <strong>Rating:</strong>
+                                                <% if $Review.Rating >= 1 %><span class="text-warning">★</span><% end_if %>
+                                                <% if $Review.Rating >= 2 %><span class="text-warning">★</span><% end_if %>
+                                                <% if $Review.Rating >= 3 %><span class="text-warning">★</span><% end_if %>
+                                                <% if $Review.Rating >= 4 %><span class="text-warning">★</span><% end_if %>
+                                                <% if $Review.Rating >= 5 %><span class="text-warning">★</span><% end_if %>
+                                                <% if $Review.Rating < 5 %><span class="text-muted">☆</span><% end_if %>
+                                                <% if $Review.Rating < 4 %><span class="text-muted">☆</span><% end_if %>
+                                                <% if $Review.Rating < 3 %><span class="text-muted">☆</span><% end_if %>
+                                                <% if $Review.Rating < 2 %><span class="text-muted">☆</span><% end_if %>
+                                                <% if $Review.Rating < 1 %><span class="text-muted">☆</span><% end_if %>
+                                                ($Review.Rating/5)
+                                            </div>
+                                            <div class="mb-2">
+                                                <strong>Pesan:</strong><br>
+                                                $Review.Message
+                                            </div>
+                                            <small class="text-muted">Direview pada: $Review.FormattedDate</small>
+                                        </div>
+                                    <% else_if $CanReview %>
+                                        <!-- Form Review -->
+                                        <form action="$BaseHref/order/review/submit/$Top.Order.ID/$Item.ID" method="post" class="mt-3 p-3 bg-light rounded">
+                                            <h6 class="mb-3">Berikan Review:</h6>
+
+                                            <div class="mb-2">
+                                                <label class="form-label">Rating *</label>
+                                                <div>
+                                                    <div class="form-check form-check-inline">
+                                                        <input class="form-check-input" type="radio" name="rating" id="rating-$Item.ID-1" value="1" required>
+                                                        <label class="form-check-label" for="rating-$Item.ID-1">1</label>
+                                                    </div>
+                                                    <div class="form-check form-check-inline">
+                                                        <input class="form-check-input" type="radio" name="rating" id="rating-$Item.ID-2" value="2">
+                                                        <label class="form-check-label" for="rating-$Item.ID-2">2</label>
+                                                    </div>
+                                                    <div class="form-check form-check-inline">
+                                                        <input class="form-check-input" type="radio" name="rating" id="rating-$Item.ID-3" value="3">
+                                                        <label class="form-check-label" for="rating-$Item.ID-3">3</label>
+                                                    </div>
+                                                    <div class="form-check form-check-inline">
+                                                        <input class="form-check-input" type="radio" name="rating" id="rating-$Item.ID-4" value="4">
+                                                        <label class="form-check-label" for="rating-$Item.ID-4">4</label>
+                                                    </div>
+                                                    <div class="form-check form-check-inline">
+                                                        <input class="form-check-input" type="radio" name="rating" id="rating-$Item.ID-5" value="5">
+                                                        <label class="form-check-label" for="rating-$Item.ID-5">5</label>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            <div class="mb-3">
+                                                <label for="message-$Item.ID" class="form-label">Pesan *</label>
+                                                <textarea class="form-control" id="message-$Item.ID" name="message" rows="3" placeholder="Tulis ulasan Anda..." required minlength="5"></textarea>
+                                            </div>
+
+                                            <button type="submit" class="btn btn-primary btn-sm">Kirim Review</button>
+                                        </form>
+                                    <% else %>
+                                        <div class="mt-3 p-2 bg-secondary bg-opacity-10 rounded">
+                                            <small class="text-muted">Review hanya tersedia setelah pesanan selesai</small>
+                                        </div>
+                                    <% end_if %>
+                                </li>
+                            <% end_loop %>
+                        </ul>
+                    <% else %>
+                        <div class="alert alert-warning">
+                            Tidak ada item dalam pesanan ini.
+                        </div>
+                    <% end_if %>
+
                 </div>
             </div>
         </div>
