@@ -43,6 +43,7 @@ class Order extends DataObject
         "ExpiresAt" => "Expires At",
         "ShippingAddress.Address" => "Address",
     ];
+
     /**
      * Set default values and expiry time
      */
@@ -154,13 +155,31 @@ class Order extends DataObject
     }
 
     /**
-     * Mark order as paid
+     * Mark order as paid and reduce product stock
      */
     public function markAsPaid()
     {
         $this->Status = 'paid';
         $this->PaymentStatus = 'paid';
+        $this->reduceProductStock();
+
         $this->write();
+    }
+
+    /**
+     * Reduce product stock based on order items
+     */
+    private function reduceProductStock()
+    {
+        $orderItems = OrderItem::get()->filter('OrderID', $this->ID);
+
+        foreach ($orderItems as $orderItem) {
+            $product = Product::get()->byID($orderItem->ProductID);
+            if ($product && $product->Stok >= $orderItem->Quantity) {
+                $product->Stok = $product->Stok - $orderItem->Quantity;
+                $product->write();
+            }
+        }
     }
 
     /**

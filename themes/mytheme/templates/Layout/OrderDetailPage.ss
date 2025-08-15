@@ -166,7 +166,7 @@
                     <p class="d-flex justify-content-between fw-bold"><span>Total</span><span>$Order.FormattedGrandTotal</span></p>
 
                     <% if $Order.canBePaid %>
-                        <a href="$BaseHref/payment/initiate/$Order.ID" class="btn btn-success w-100 mt-2">Bayar Sekarang</a>
+                        <a href="$BaseHref/payment/initiate/$Order.ID" target="_blank" class="btn btn-success w-100 mt-2">Bayar Sekarang</a>
                     <% end_if %>
                 </div>
             </div>

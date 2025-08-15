@@ -268,6 +268,12 @@ class CheckoutPageController extends PageController
                 return $this->redirect(Director::absoluteBaseURL() . '/cart');
             }
 
+            // Check stock availability before processing order
+            if (!$this->checkStockAvailability($cartItems)) {
+                $this->getRequest()->getSession()->set('CheckoutError', 'Stok produk tidak mencukupi');
+                return $this->redirectBack();
+            }
+
             $shippingAddress = ShippingAddress::get()->filter('MemberID', $user->ID)->first();
             if (!$shippingAddress) {
                 return $this->redirect(Director::absoluteBaseURL() . '/checkout/detail-alamat');
@@ -326,6 +332,20 @@ class CheckoutPageController extends PageController
         }
 
         return $this->redirectBack();
+    }
+
+    /**
+     * Check stock availability for cart items
+     */
+    private function checkStockAvailability($cartItems)
+    {
+        foreach ($cartItems as $cartItem) {
+            $product = Product::get()->byID($cartItem->ProductID);
+            if (!$product || $product->Stok < $cartItem->Quantity) {
+                return false;
+            }
+        }
+        return true;
     }
 
     /**

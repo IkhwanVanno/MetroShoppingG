@@ -31,7 +31,7 @@
                                         <a href="$BaseHref/order/detail/$ID" class="btn btn-primary btn-sm">Lihat Detail</a>
 
                                         <% if $canBePaid %>
-                                            <a href="$BaseHref/payment/initiate/$ID" class="btn btn-success btn-sm">Bayar Sekarang</a>
+                                            <a href="$BaseHref/payment/initiate/$ID" target="_blank" class="btn btn-success btn-sm">Bayar Sekarang</a>
                                         <% end_if %>
 
                                         <% if $canBeCancelled %>
