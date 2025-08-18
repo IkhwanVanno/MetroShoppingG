@@ -2,12 +2,14 @@
 
 use SilverStripe\Control\Director;
 use SilverStripe\Control\HTTPRequest;
+use SilverStripe\Core\Environment;
 use SilverStripe\Core\Injector\Injector;
 use SilverStripe\ORM\ValidationResult;
 use SilverStripe\Security\IdentityStore;
 use SilverStripe\Security\Member;
 use SilverStripe\Security\MemberAuthenticator\LoginHandler;
 use SilverStripe\Security\MemberAuthenticator\MemberAuthenticator;
+use SilverStripe\SiteConfig\SiteConfig;
 
 class AuthPageController extends PageController
 {
@@ -72,6 +74,12 @@ class AuthPageController extends PageController
         $loginHandler = new LoginHandler('auth', $authenticator);
 
         if ($member = $loginHandler->checkLogin($data, $request, $result)) {
+            // Tambahan: cek verifikasi
+            if (!$member->IsVerified) {
+                $result->addError('Akun Anda belum diverifikasi. Silakan cek email.');
+                return $result;
+            }
+
             if (!$member->inGroup('site-users')) {
                 Injector::inst()->get(IdentityStore::class)->logOut($request);
                 $result->addError('Invalid credentials.');
@@ -85,43 +93,63 @@ class AuthPageController extends PageController
 
     private function processRegister(HTTPRequest $request)
     {
+        $baseURL = Environment::getEnv('SS_BASE_URL');
+
         $firstName = $request->postVar('register_first_name');
         $lastName = $request->postVar('register_last_name');
-        $email = $request->postVar('register_email');
+        $userEmail = $request->postVar('register_email');
         $password1 = $request->postVar('register_password_1');
         $password2 = $request->postVar('register_password_2');
 
+        $SiteConfig = SiteConfig::current_site_config();
+        $emails = explode(',', $SiteConfig->Email);
+        $CompanyEmail = trim($emails[0]);
+
         $result = ValidationResult::create();
 
-        // Basic validation
         if ($password1 !== $password2) {
             $result->addError('Passwords do not match.');
             return $result;
         }
 
-        if (Member::get()->filter('Email', $email)->exists()) {
+        if (Member::get()->filter('Email', $userEmail)->exists()) {
             $result->addError('Email already exists.');
             return $result;
         }
 
-        // Create member
+        // Buat member baru dengan token verifikasi
         $member = Member::create();
         $member->FirstName = $firstName;
         $member->Surname = $lastName;
-        $member->Email = $email;
+        $member->Email = $userEmail;
+        $member->VerificationToken = sha1(uniqid());
+        $member->IsVerified = false;
         $member->write();
         $member->addToGroupByCode('site-users');
         $member->changePassword($password1);
 
-        // Auto login
-        $data = ['Email' => $email, 'Password' => $password1, 'Remember' => 1];
-        $authenticator = new MemberAuthenticator();
+        // Kirim email verifikasi
+        $verifyLink = rtrim($baseURL, '/') . '/verify?token=' . $member->VerificationToken;
 
-        if ($authenticatedMember = $authenticator->authenticate($data, $request, $result)) {
-            $identityStore = Injector::inst()->get(IdentityStore::class);
-            $identityStore->logIn($authenticatedMember, true, $request);
-        }
+        $emailObj = \SilverStripe\Control\Email\Email::create()
+            ->setTo($userEmail)
+            ->setFrom($CompanyEmail)
+            ->setSubject('Verifikasi Email Anda')
+            ->setHTMLTemplate('CustomEmail')
+            ->setData([
+                'Name' => $firstName,
+                'SenderEmail' => $userEmail,
+                'MessageContent' => "
+                    Terima kasih telah mendaftar. Silakan salin link di bawah untuk memverifikasi akun Anda.
+                    {$verifyLink}",
+                'SiteName' => $SiteConfig->Title,
+            ]);
+
+        $emailObj->send();
+
+        $result->addMessage('Registrasi berhasil! Silakan cek email untuk verifikasi akun.');
 
         return $result;
     }
+
 }
