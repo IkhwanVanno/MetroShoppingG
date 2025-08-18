@@ -46,7 +46,7 @@
                     <p><strong>Status:</strong> $Order.StatusLabel.RAW</p>
                     <p><strong>Pembayaran:</strong> $Order.PaymentStatusLabel.RAW</p>
                     <p><strong>Tanggal:</strong> $Order.CreateAt.Nice</p>
-
+                    <p><strong>Resi:</strong> <span class="text-primary">$Order.TrackingNumber</p>
                     <% if $Order.ExpiresAt && $Order.canBePaid %>
                         <p class="text-danger"><strong>Batas:</strong> $Order.ExpiresAt.Nice</p>
                     <% end_if %>
@@ -60,6 +60,7 @@
                                 <li class="list-group-item">
                                     <div class="d-flex justify-content-between align-items-center">
                                         <div class="d-flex align-items-center">
+                                            <a href="$BaseHref/list-product/view/$Item.Product.ID" class="text-decoration-none text-black">
                                             <% if $Item.Product.Image %>
                                                 <img src="$Item.Product.Image.URL" alt="$Item.Product.Name" class="me-2 rounded" style="width:50px; height:50px; object-fit:cover;">
                                             <% else %>
@@ -67,6 +68,7 @@
                                                     <small class="text-muted">No Image</small>
                                                 </div>
                                             <% end_if %>
+                                            </a>
                                             <div>
                                                 <strong>$Item.Product.Name</strong><br>
                                                 <small>Rp $Item.FormattedPrice x $Item.Quantity</small>

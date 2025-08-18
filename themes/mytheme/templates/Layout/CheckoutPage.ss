@@ -33,11 +33,13 @@
             <div class="card-body">
                 <% loop CartItems %>
                 <div class="d-flex align-items-center border-bottom pb-3 mb-3">
+                    <a href="$BaseHref/list-product/view/$Product.ID" class="text-decoration-none text-black">
                     <% if $Product.Image %>
                         <img src="$Product.Image.URL" class="me-3" alt="$Product.Name" width="80" />
                     <% else %>
                         <img src="https://picsum.photos/80?random=$Product.ID" class="me-3" alt="$Product.Name" width="80" />
                     <% end_if %>
+                    </a>
                     <div class="flex-grow-1">
                         <h6 class="mb-1">$Product.Name</h6>
                         <small class="text-muted">Berat: $Product.Weight gr</small>

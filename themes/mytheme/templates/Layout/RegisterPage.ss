@@ -1,7 +1,17 @@
 <main class="d-flex justify-content-center align-items-center" style="min-height: 100vh;">
   <form action="$BaseHref/auth/register" method="POST" class="w-100 p-4 border rounded shadow-sm" style="max-width: 500px;">
     <h4 class="mb-3">Register</h4>
-
+    <% if $ValidationResult %>
+      <% if $ValidationResult.isValid %>
+        <% loop $ValidationResult.Messages %>
+          <div class="alert alert-success" role="alert">$Message</div>
+        <% end_loop %>
+      <% else %>
+        <% loop $ValidationResult.Messages %>
+          <div class="alert alert-danger" role="alert">$Message</div>
+        <% end_loop %>
+      <% end_if %>
+    <% end_if %>
     <div class="row">
       <div class="col-md-6 mb-3">
         <label for="register_first_name" class="form-label">First Name</label>

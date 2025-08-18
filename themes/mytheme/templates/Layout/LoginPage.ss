@@ -1,7 +1,17 @@
 <main class="container d-flex justify-content-center align-items-center" style="min-height: 100vh;">
   <form action="$BaseHref/auth/login" method="POST" class="w-100 p-4 border rounded shadow-sm" style="max-width: 400px;">
     <h4 class="mb-3">Login</h4>
-
+    <% if $ValidationResult %>
+      <% if $ValidationResult.isValid %>
+        <% loop $ValidationResult.Messages %>
+          <div class="alert alert-success" role="alert">$Message</div>
+        <% end_loop %>
+      <% else %>
+        <% loop $ValidationResult.Messages %>
+          <div class="alert alert-danger" role="alert">$Message</div>
+        <% end_loop %>
+      <% end_if %>
+    <% end_if %>
     <div class="mb-3">
       <label for="login_email" class="form-label">Email</label>
       <input type="email" class="form-control" id="login_email" name="login_email" required>

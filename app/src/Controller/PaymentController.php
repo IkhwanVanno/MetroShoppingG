@@ -3,6 +3,7 @@
 use SilverStripe\Control\Director;
 use SilverStripe\Control\HTTPRequest;
 use SilverStripe\Control\HTTPResponse;
+use SilverStripe\Security\Security;
 
 class PaymentController extends PageController
 {
@@ -35,19 +36,21 @@ class PaymentController extends PageController
             return $this->httpError(404, 'Order not found');
         }
 
-        if (!$this->getCurrentUser() || $order->MemberID != $this->getCurrentUser()->ID) {
+        // Check if user is logged in and owns the order
+        $currentUser = Security::getCurrentUser();
+        if (!$currentUser || $order->MemberID != $currentUser->ID) {
             return $this->httpError(403, 'Access denied');
         }
 
         if ($order->isExpired()) {
             $order->cancelOrder();
-            $this->getRequest()->getSession()->set('PaymentError', 'Pesanan telah kedaluwarsa');
-            return $this->redirect(Director::absoluteBaseURL() . '/order/detail/' . $orderID);
+            $request->getSession()->set('PaymentError', 'Pesanan telah kedaluwarsa');
+            return $this->redirect(Director::absoluteBaseURL() . 'order/detail/' . $orderID);
         }
 
         if (!$order->canBePaid()) {
-            $this->getRequest()->getSession()->set('PaymentError', 'Pesanan tidak dapat dibayar');
-            return $this->redirect(Director::absoluteBaseURL() . '/order/detail/' . $orderID);
+            $request->getSession()->set('PaymentError', 'Pesanan tidak dapat dibayar');
+            return $this->redirect(Director::absoluteBaseURL() . 'order/detail/' . $orderID);
         }
 
         $duitku = new DuitkuService();
@@ -57,7 +60,7 @@ class PaymentController extends PageController
             $transaction = PaymentTransaction::create();
             $transaction->OrderID = $order->ID;
             $transaction->PaymentGateway = 'duitku';
-            $transaction->TransactionID = $order->OrderCode;
+            $transaction->TransactionID = $response['merchantOrderId'] ?? $order->OrderCode;
             $transaction->Amount = $order->getGrandTotal();
             $transaction->Status = 'pending';
             $transaction->CreateAt = date('Y-m-d H:i:s');
@@ -72,8 +75,8 @@ class PaymentController extends PageController
         }
 
         $errorMessage = isset($response['error']) ? $response['error'] : 'Gagal membuat transaksi pembayaran';
-        $this->getRequest()->getSession()->set('PaymentError', $errorMessage);
-        return $this->redirect(Director::absoluteBaseURL() . '/order/detail/' . $orderID);
+        $request->getSession()->set('PaymentError', $errorMessage);
+        return $this->redirect(Director::absoluteBaseURL() . 'order/detail/' . $orderID);
     }
 
     /**
@@ -81,39 +84,69 @@ class PaymentController extends PageController
      */
     public function callback(HTTPRequest $request)
     {
-        if (!$request->isPOST()) {
+        // Allow both POST and GET requests for ngrok compatibility
+        if (!$request->isPOST() && !$request->isGET()) {
             return $this->httpError(405, 'Method not allowed');
         }
 
-        $data = json_decode($request->getBody(), true);
-
-        if (!$data) {
-            return $this->httpError(400, 'Invalid JSON data');
+        // Handle both POST body and GET parameters
+        if ($request->isPOST()) {
+            $rawBody = $request->getBody();
+            $data = json_decode($rawBody, true);
+            
+            // If JSON decode fails, try getting from POST data
+            if (!$data) {
+                $data = $request->postVars();
+            }
+        } else {
+            // Handle GET request (some payment gateways use GET for callbacks)
+            $data = $request->getVars();
         }
+
+        if (!$data || empty($data)) {
+            error_log('PaymentController::callback - No data received');
+            return new HTTPResponse('No data received', 400);
+        }
+
+        error_log('PaymentController::callback - Received data: ' . json_encode($data));
 
         $duitku = new DuitkuService();
 
+        // Verify callback signature
         if (!$duitku->verifyCallback($data)) {
-            return $this->httpError(400, 'Invalid signature');
+            error_log('PaymentController::callback - Invalid signature');
+            return new HTTPResponse('Invalid signature', 400);
         }
 
-        $merchantOrderId = $data['merchantOrderId'];
-        $resultCode = $data['resultCode'];
+        $merchantOrderId = $data['merchantOrderId'] ?? '';
+        $resultCode = $data['resultCode'] ?? '';
+
+        if (empty($merchantOrderId)) {
+            error_log('PaymentController::callback - Missing merchantOrderId');
+            return new HTTPResponse('Missing merchantOrderId', 400);
+        }
 
         $transaction = PaymentTransaction::get()->filter('TransactionID', $merchantOrderId)->first();
 
         if (!$transaction) {
-            return $this->httpError(404, 'Transaction not found');
+            error_log('PaymentController::callback - Transaction not found: ' . $merchantOrderId);
+            return new HTTPResponse('Transaction not found', 404);
         }
 
         $order = $transaction->Order();
+        if (!$order) {
+            error_log('PaymentController::callback - Order not found for transaction: ' . $merchantOrderId);
+            return new HTTPResponse('Order not found', 404);
+        }
 
+        // Update transaction with callback data
         $transaction->ResponseData = json_encode($data);
 
         if ($resultCode == '00') {
             $transaction->Status = 'success';
             $order->markAsPaid();
-
+            
+            error_log('PaymentController::callback - Payment success for order: ' . $order->ID);
             $this->sendPaymentSuccessNotification($order);
 
         } else {
@@ -122,11 +155,13 @@ class PaymentController extends PageController
             $order->PaymentStatus = 'failed';
             $order->write();
 
+            error_log('PaymentController::callback - Payment failed for order: ' . $order->ID . ', resultCode: ' . $resultCode);
             $this->sendPaymentFailedNotification($order);
         }
 
         $transaction->write();
-        return HTTPResponse::create('OK', 200);
+        
+        return new HTTPResponse('OK', 200);
     }
 
     /**
@@ -137,15 +172,21 @@ class PaymentController extends PageController
         $merchantOrderId = $request->getVar('merchantOrderId');
         $resultCode = $request->getVar('resultCode');
 
+        error_log('PaymentController::return - merchantOrderId: ' . $merchantOrderId . ', resultCode: ' . $resultCode);
+
         if (!$merchantOrderId) {
-            return $this->redirect(Director::absoluteBaseURL() . '/order');
+            return $this->redirect(Director::absoluteBaseURL() . 'order');
         }
 
         $transaction = PaymentTransaction::get()->filter('TransactionID', $merchantOrderId)->first();
+        $order = null;
 
         if (!$transaction) {
+            // Try to find order by OrderCode if transaction not found
             $order = Order::get()->filter('OrderCode', $merchantOrderId)->first();
-            if (!$order) {
+            
+            if ($order) {
+                // Create transaction record if it doesn't exist
                 $transaction = PaymentTransaction::create();
                 $transaction->OrderID = $order->ID;
                 $transaction->PaymentGateway = 'duitku';
@@ -155,10 +196,15 @@ class PaymentController extends PageController
                 $transaction->CreateAt = date('Y-m-d H:i:s');
                 $transaction->write();
             } else {
-                return $this->redirect(Director::absoluteBaseURL() . '/order');
+                error_log('PaymentController::return - Order not found: ' . $merchantOrderId);
+                return $this->redirect(Director::absoluteBaseURL() . 'order');
             }
         } else {
             $order = $transaction->Order();
+        }
+
+        if (!$order) {
+            return $this->redirect(Director::absoluteBaseURL() . 'order');
         }
 
         if ($resultCode == '00') {
@@ -167,7 +213,8 @@ class PaymentController extends PageController
 
             $order->markAsPaid();
 
-            $this->getRequest()->getSession()->set('PaymentSuccess', 'Pembayaran berhasil! Pesanan Anda sedang diproses.');
+            $request->getSession()->set('PaymentSuccess', 'Pembayaran berhasil! Pesanan Anda sedang diproses.');
+            error_log('PaymentController::return - Payment success for order: ' . $order->ID);
         } else {
             $transaction->Status = 'failed';
             $transaction->write();
@@ -176,8 +223,10 @@ class PaymentController extends PageController
             $order->PaymentStatus = 'failed';
             $order->write();
 
-            $this->getRequest()->getSession()->set('PaymentError', 'Pembayaran gagal atau dibatalkan. Pesanan telah dibatalkan.');
+            $request->getSession()->set('PaymentError', 'Pembayaran gagal atau dibatalkan. Pesanan telah dibatalkan.');
+            error_log('PaymentController::return - Payment failed for order: ' . $order->ID);
         }
+        
         return $this->redirect(Director::absoluteBaseURL() . '/order/detail/' . $order->ID);
     }
 
@@ -186,7 +235,8 @@ class PaymentController extends PageController
      */
     private function sendPaymentSuccessNotification($order)
     {
-
+        // TODO: Implement notification logic
+        error_log('PaymentController - Payment success notification for order: ' . $order->ID);
     }
 
     /**
@@ -194,6 +244,7 @@ class PaymentController extends PageController
      */
     private function sendPaymentFailedNotification($order)
     {
-
+        // TODO: Implement notification logic
+        error_log('PaymentController - Payment failed notification for order: ' . $order->ID);
     }
 }

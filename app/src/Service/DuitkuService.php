@@ -15,8 +15,14 @@ class DuitkuService
         $this->merchantCode = Environment::getEnv('DUITKU_MERCHANT_CODE');
         $this->apiKey = Environment::getEnv('DUITKU_API_KEY');
         $this->baseUrl = Environment::getEnv('DUITKU_BASE_URL');
-        $this->callbackUrl = Environment::getEnv('SS_BASE_URL') . '/payment/callback';
-        $this->returnUrl = Environment::getEnv('SS_BASE_URL') . '/payment/return';
+
+        // Use ngrok URL for callback and return
+        $ngrokUrl = Environment::getEnv('NGROK_URL') ?: 'https://1683d345346d.ngrok-free.app';
+        $this->callbackUrl = $ngrokUrl . '/payment/callback';
+        $this->returnUrl = $ngrokUrl . '/payment/return';
+
+        error_log('DuitkuService - Callback URL: ' . $this->callbackUrl);
+        error_log('DuitkuService - Return URL: ' . $this->returnUrl);
     }
 
     /**
@@ -72,22 +78,15 @@ class DuitkuService
             'expiryPeriod' => 1440,
         ];
 
+        error_log('DuitkuService::createTransaction - Request params: ' . json_encode($params));
+
         $response = $this->makeRequest($this->baseUrl, $params, 'POST');
-        error_log('Duitku Response: ' . print_r($response, true));
+        error_log('DuitkuService::createTransaction - Response: ' . json_encode($response));
 
         if ($response && isset($response['statusCode']) && $response['statusCode'] == '00') {
-            $transaction = PaymentTransaction::create();
-            $transaction->OrderID = $order->ID;
-            $transaction->PaymentGateway = 'Duitku';
-            $transaction->TransactionID = $merchantOrderId;
-            $transaction->Amount = $paymentAmount;
-            $transaction->Status = 'pending';
-            $transaction->ResponseData = json_encode($response);
-            $transaction->CreateAt = date('Y-m-d H:i:s');
-            $transaction->write();
-
             return [
                 'success' => true,
+                'merchantOrderId' => $merchantOrderId,
                 'paymentUrl' => $response['paymentUrl'] ?? null,
                 'vaNumber' => $response['vaNumber'] ?? null,
                 'qrString' => $response['qrString'] ?? null,
@@ -95,9 +94,9 @@ class DuitkuService
                 'statusMessage' => $response['statusMessage'] ?? 'Transaction created successfully'
             ];
         }
-        
+
         if ($response) {
-            error_log('Duitku Error: ' . print_r($response, true));
+            error_log('DuitkuService::createTransaction - Error response: ' . json_encode($response));
         }
 
         return [
@@ -116,9 +115,20 @@ class DuitkuService
         $amount = $data['amount'] ?? 0;
         $receivedSignature = $data['signature'] ?? '';
 
+        if (empty($merchantOrderId) || empty($receivedSignature)) {
+            error_log('DuitkuService::verifyCallback - Missing required fields');
+            return false;
+        }
+
         $calculatedSignature = md5($this->merchantCode . $amount . $merchantOrderId . $this->apiKey);
 
-        return hash_equals($calculatedSignature, $receivedSignature);
+        error_log('DuitkuService::verifyCallback - Calculated signature: ' . $calculatedSignature);
+        error_log('DuitkuService::verifyCallback - Received signature: ' . $receivedSignature);
+
+        $isValid = hash_equals($calculatedSignature, $receivedSignature);
+        error_log('DuitkuService::verifyCallback - Signature valid: ' . ($isValid ? 'true' : 'false'));
+
+        return $isValid;
     }
 
     /**
@@ -145,7 +155,7 @@ class DuitkuService
         $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
 
         if (curl_error($ch)) {
-            error_log('CURL Error: ' . curl_error($ch));
+            error_log('DuitkuService - CURL Error: ' . curl_error($ch));
         }
 
         curl_close($ch);
@@ -154,7 +164,7 @@ class DuitkuService
             return json_decode($response, true);
         }
 
-        error_log("HTTP Error Code: $httpCode, Response: $response");
+        error_log("DuitkuService - HTTP Error Code: $httpCode, Response: $response");
         return false;
     }
 }

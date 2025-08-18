@@ -25,16 +25,19 @@ class AuthPageController extends PageController
 
     public function login(HTTPRequest $request)
     {
-        if ($request->isPOST()) {
-            $result = $this->processLogin($request);
+        $validationResult = null;
 
-            if ($result->isValid()) {
+        if ($request->isPOST()) {
+            $validationResult = $this->processLogin($request);
+
+            if ($validationResult->isValid()) {
                 return $this->redirect(Director::absoluteBaseURL());
             }
         }
 
         $data = array_merge($this->getCommonData(), [
-            'Title' => 'Login'
+            'Title' => 'Login',
+            'ValidationResult' => $validationResult
         ]);
 
         return $this->customise($data)->renderWith(['LoginPage', 'Page']);
@@ -42,16 +45,19 @@ class AuthPageController extends PageController
 
     public function register(HTTPRequest $request)
     {
-        if ($request->isPOST()) {
-            $result = $this->processRegister($request);
+        $validationResult = null;
 
-            if ($result->isValid()) {
+        if ($request->isPOST()) {
+            $validationResult = $this->processRegister($request);
+
+            if ($validationResult->isValid()) {
                 return $this->redirect(Director::absoluteBaseURL());
             }
         }
 
         $data = array_merge($this->getCommonData(), [
-            'Title' => 'Register'
+            'Title' => 'Register',
+            'ValidationResult'=> $validationResult
         ]);
 
         return $this->customise($data)->renderWith(['RegisterPage', 'Page']);
@@ -94,6 +100,7 @@ class AuthPageController extends PageController
     private function processRegister(HTTPRequest $request)
     {
         $baseURL = Environment::getEnv('SS_BASE_URL');
+        $ngrokUrl = Environment::getEnv('NGROK_URL');
 
         $firstName = $request->postVar('register_first_name');
         $lastName = $request->postVar('register_last_name');
@@ -129,7 +136,7 @@ class AuthPageController extends PageController
         $member->changePassword($password1);
 
         // Kirim email verifikasi
-        $verifyLink = rtrim($baseURL, '/') . '/verify?token=' . $member->VerificationToken;
+        $verifyLink = rtrim($ngrokUrl, '/') . '/verify?token=' . $member->VerificationToken;
 
         $emailObj = \SilverStripe\Control\Email\Email::create()
             ->setTo($userEmail)

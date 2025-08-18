@@ -34,7 +34,7 @@
                             <% else %>
                             <span class="badge bg-secondary text-light me-1" style="font-size: 0.6rem">★ 0</span>
                             <% end_if %>
-                            <small class="text-muted" style="font-size: 0.6rem">$Stok left</small>
+                            <small class="text-muted" style="font-size: 0.6rem">$Stok available</small>
                         </div>
                         <div class="d-flex align-items-center justify-content-between">
                             <!-- Display Price -->
