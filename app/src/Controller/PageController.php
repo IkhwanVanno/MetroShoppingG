@@ -13,6 +13,7 @@ namespace {
     use SilverStripe\Forms\RequiredFields;
     use SilverStripe\Forms\TextareaField;
     use SilverStripe\Forms\TextField;
+    use SilverStripe\ORM\ArrayList;
     use SilverStripe\Security\Security;
     use SilverStripe\SiteConfig\SiteConfig;
 
@@ -48,7 +49,12 @@ namespace {
             $carouselImages = CarouselImage::get();
             $categories = Category::get();
             $contacts = Contact::get();
-            $eventShops = EventShop::get();
+
+            $currentDateTime = date('Y-m-d H:i:s');
+            $eventShops = EventShop::get()
+                ->filter('EndDate:GreaterThan', $currentDateTime)
+                ->sort('EndDate', 'ASC');
+
             $products = Product::get();
 
             $verticalCategoryFilter = $request->getVar('vertical_category');
@@ -70,6 +76,27 @@ namespace {
             ]);
 
             return $this->customise($data)->renderWith('Page');
+        }
+        public function EventShopGrouped()
+        {
+            $eventShop = EventShop::get();
+            $grouped = new ArrayList();
+            $chunk = [];
+
+            foreach ($eventShop as $event) {
+                $chunk[] = $event;
+
+                if (count($chunk) === 2) {
+                    $grouped->push(new ArrayList($chunk));
+                    $chunk = [];
+                }
+            }
+
+            if (!empty($chunk)) {
+                $grouped->push(new ArrayList($chunk));
+            }
+
+            return $grouped;
         }
 
         // Authentication methods

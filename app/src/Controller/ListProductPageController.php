@@ -2,6 +2,7 @@
 
 use SilverStripe\Control\HTTPRequest;
 use SilverStripe\ORM\PaginatedList;
+use SilverStripe\ORM\ArrayList;
 
 class ListProductPageController extends PageController
 {
@@ -32,11 +33,11 @@ class ListProductPageController extends PageController
             'Category' => $categories,
             'CategoryFilter' => $categoryFilter,
             'SearchQuery' => $searchQuery,
-            // Add filter values for maintaining state
             'MinPriceFilter' => $request->getVar('min_price'),
             'MaxPriceFilter' => $request->getVar('max_price'),
             'SortFilter' => $request->getVar('sort'),
-            'StockFilter' => $request->getVar('stock')
+            'StockFilter' => $request->getVar('stock'),
+            'RatingFilter' => $request->getVar('rating')
         ]);
 
         return $this->customise($data)->renderWith(['ListProductPage', 'Page']);
@@ -53,7 +54,6 @@ class ListProductPageController extends PageController
 
         $reviews = Review::get()->filter('ProductID', $id);
 
-        // Check user status
         $isFavorite = false;
         $isInCart = false;
 
@@ -92,15 +92,14 @@ class ListProductPageController extends PageController
         $maxPrice = $request->getVar('max_price');
         $stock = $request->getVar('stock');
         $sort = $request->getVar('sort');
+        $rating = $request->getVar('rating');
 
         $products = Product::get();
 
-        // Filter by category
         if ($category) {
             $products = $products->filter('CategoryID', $category);
         }
 
-        // Search by name or description
         if ($search) {
             $products = $products->filterAny([
                 'Name:PartialMatch' => $search,
@@ -108,7 +107,6 @@ class ListProductPageController extends PageController
             ]);
         }
 
-        // Filter by stock
         if ($stock) {
             switch ($stock) {
                 case 'available':
@@ -120,21 +118,53 @@ class ListProductPageController extends PageController
             }
         }
 
-        // Filter by price range
-        if ($minPrice && is_numeric($minPrice) && $minPrice > 0) {
-            $products = $products->filter('Price:GreaterThanOrEqual', (float) $minPrice);
-        }
-        if ($maxPrice && is_numeric($maxPrice) && $maxPrice > 0) {
-            $products = $products->filter('Price:LessThanOrEqual', (float) $maxPrice);
+        if ($rating && is_numeric($rating) && $rating >= 1 && $rating <= 5) {
+            $productIds = $this->getProductIdsByMinRating((float) $rating);
+            if (!empty($productIds)) {
+                $products = $products->filter('ID', $productIds);
+            } else {
+                $products = $products->filter('ID', 0);
+            }
         }
 
-        // Sort by option
+        $productsArray = [];
+        foreach ($products as $product) {
+            $finalPrice = $product->getDisplayPriceValue();
+            
+            $includeProduct = true;
+            
+            if ($minPrice && is_numeric($minPrice) && $minPrice > 0) {
+                if ($finalPrice < (float) $minPrice) {
+                    $includeProduct = false;
+                }
+            }
+            
+            if ($maxPrice && is_numeric($maxPrice) && $maxPrice > 0) {
+                if ($finalPrice > (float) $maxPrice) {
+                    $includeProduct = false;
+                }
+            }
+            
+            if ($includeProduct) {
+                $productsArray[] = $product;
+            }
+        }
+
+        if (!empty($productsArray)) {
+            $productIds = array_map(function($product) {
+                return $product->ID;
+            }, $productsArray);
+            $products = Product::get()->filter('ID', $productIds);
+        } else {
+            $products = Product::get()->filter('ID', 0);
+        }
+
         switch ($sort) {
             case 'price_asc':
-                $products = $products->sort('Price', 'ASC');
+                $products = $this->sortProductsByPrice($products, 'ASC');
                 break;
             case 'price_desc':
-                $products = $products->sort('Price', 'DESC');
+                $products = $this->sortProductsByPrice($products, 'DESC');
                 break;
             case 'name_asc':
                 $products = $products->sort('Name', 'ASC');
@@ -142,10 +172,93 @@ class ListProductPageController extends PageController
             case 'name_desc':
                 $products = $products->sort('Name', 'DESC');
                 break;
+            case 'rating_desc':
+                $products = $this->sortProductsByRating($products, 'DESC');
+                break;
+            case 'rating_asc':
+                $products = $this->sortProductsByRating($products, 'ASC');
+                break;
             default:
-                $products = $products->sort('Created', 'DESC'); // default sorting
+                $products = $products->sort('Created', 'DESC');
         }
 
         return $products;
+    }
+
+    /**
+     * Get product IDs that have minimum rating
+     */
+    private function getProductIdsByMinRating($minRating)
+    {
+        $productIds = [];
+        $allProducts = Product::get();
+        
+        foreach ($allProducts as $product) {
+            $averageRating = $product->getAverageRating();
+            if ($averageRating !== null && (float) $averageRating >= $minRating) {
+                $productIds[] = $product->ID;
+            }
+        }
+        
+        return $productIds;
+    }
+
+    /**
+     * Sort products by final price (considering discounts)
+     */
+    private function sortProductsByPrice($products, $direction = 'ASC')
+    {
+        $productsArray = [];
+        foreach ($products as $product) {
+            $productsArray[] = [
+                'product' => $product,
+                'final_price' => $product->getDisplayPriceValue()
+            ];
+        }
+
+        usort($productsArray, function($a, $b) use ($direction) {
+            if ($direction === 'ASC') {
+                return $a['final_price'] <=> $b['final_price'];
+            } else {
+                return $b['final_price'] <=> $a['final_price'];
+            }
+        });
+
+        $sortedProducts = [];
+        foreach ($productsArray as $item) {
+            $sortedProducts[] = $item['product'];
+        }
+
+        return new ArrayList($sortedProducts);
+    }
+
+    /**
+     * Sort products by rating
+     */
+    private function sortProductsByRating($products, $direction = 'DESC')
+    {
+        $productsArray = [];
+        foreach ($products as $product) {
+            $averageRating = $product->getAverageRating();
+            $productsArray[] = [
+                'product' => $product,
+                'rating' => $averageRating !== null ? (float) $averageRating : 0
+            ];
+        }
+
+        usort($productsArray, function($a, $b) use ($direction) {
+            if ($direction === 'ASC') {
+                return $a['rating'] <=> $b['rating'];
+            } else {
+                return $b['rating'] <=> $a['rating'];
+            }
+        });
+
+        $sortedProducts = [];
+        foreach ($productsArray as $item) {
+            $sortedProducts[] = $item['product'];
+        }
+
+        return new ArrayList($sortedProducts);
     }
 }

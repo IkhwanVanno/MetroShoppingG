@@ -96,25 +96,42 @@
 	</div>
 
 	<!-- Event Images -->
-	<div class="row mt-5">
-	<% loop EventShop.Limit(2) %>
-		<div class="col-12 col-md-6 position-relative overflow-hidden" style="height: 250px">
-			<a href="$BaseHref/event/$ID" class="text-decoration-none">
+	<div id="eventCarousel" class="carousel slide mt-5" data-bs-ride="carousel">
+	<div class="carousel-inner">
+		<% loop $EventShopGrouped %>
+		<div class="carousel-item<% if $First %> active<% end_if %>">
+		<div class="row">
+			<% loop $Me %>
+			<div class="col-12 col-md-6 position-relative overflow-hidden">
+			<a href="$BaseHref/event/$ID" class="text-decoration-none d-block w-100" style="height: 250px;">
 				<% if $Image %>
-					<img
-						src="$Image.URL"
-						alt="$Name"
-						class="img-fluid w-100 h-100"
-						style="object-fit: cover"
-					/>
+				<img
+				src="$Image.URL"
+				alt="$Name"
+				class="img-fluid w-100 h-100 py-1"
+				style="object-fit: cover"
+				/>
 				<% else %>
-					<div class="d-flex align-items-center justify-content-center h-100 bg-light">
-						<span class="text-muted">No Image Available</span>
-					</div>
+				<div class="d-flex align-items-center justify-content-center h-100 bg-light">
+				<span class="text-muted">No Image Available</span>
+				</div>
 				<% end_if %>
 			</a>
+			</div>
+			<% end_loop %>
 		</div>
-	<% end_loop %>
+		</div>
+		<% end_loop %>
+	</div>
+
+	<button class="carousel-control-prev" type="button" data-bs-target="#eventCarousel" data-bs-slide="prev">
+		<span class="carousel-control-prev-icon" aria-hidden="true"></span>
+		<span class="visually-hidden">Previous</span>
+	</button>
+	<button class="carousel-control-next" type="button" data-bs-target="#eventCarousel" data-bs-slide="next">
+		<span class="carousel-control-next-icon" aria-hidden="true"></span>
+		<span class="visually-hidden">Next</span>
+	</button>
 	</div>
 	</section>
 
