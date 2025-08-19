@@ -15,6 +15,7 @@ class Review extends DataObject
     private static $has_one = [
         "Product" => Product::class,
         "Member" => Member::class,
+        "OrderItem" => OrderItem::class,
     ];
 
     /**

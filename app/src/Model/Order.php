@@ -19,6 +19,7 @@ class Order extends DataObject
         "CreateAt" => "Datetime",
         "UpdateAt" => "Datetime",
         "ExpiresAt" => "Datetime",
+        "StockReduced" => "Boolean(0)", // Flag untuk track apakah stok sudah dikurangi
     ];
     private static $has_one = [
         "Member" => Member::class,
@@ -148,6 +149,12 @@ class Order extends DataObject
             if ($this->PaymentStatus == 'unpaid') {
                 $this->PaymentStatus = 'failed';
             }
+            
+            // Restore stock if it was already reduced
+            if ($this->StockReduced) {
+                $this->restoreStock();
+            }
+            
             $this->write();
             return true;
         }
@@ -159,27 +166,129 @@ class Order extends DataObject
      */
     public function markAsPaid()
     {
+        // Validasi stok sebelum menandai sebagai paid
+        if (!$this->validateStock()) {
+            error_log('Order::markAsPaid - Stock validation failed for order: ' . $this->ID);
+            return false;
+        }
+
         $this->Status = 'paid';
         $this->PaymentStatus = 'paid';
-        $this->reduceProductStock();
-
+        
+        // Kurangi stok produk jika belum dikurangi
+        if (!$this->StockReduced) {
+            $stockReduced = $this->reduceStock();
+            if ($stockReduced) {
+                $this->StockReduced = true;
+                error_log('Order::markAsPaid - Stock reduced successfully for order: ' . $this->ID);
+            } else {
+                error_log('Order::markAsPaid - Failed to reduce stock for order: ' . $this->ID);
+                return false;
+            }
+        }
+        
         $this->write();
+        return true;
     }
 
     /**
-     * Reduce product stock based on order items
+     * Validate if all products have sufficient stock
      */
-    private function reduceProductStock()
+    private function validateStock()
     {
-        $orderItems = OrderItem::get()->filter('OrderID', $this->ID);
-
-        foreach ($orderItems as $orderItem) {
-            $product = Product::get()->byID($orderItem->ProductID);
-            if ($product && $product->Stok >= $orderItem->Quantity) {
-                $product->Stok = $product->Stok - $orderItem->Quantity;
-                $product->write();
+        $orderItems = $this->OrderItem();
+        
+        foreach ($orderItems as $item) {
+            $product = $item->Product();
+            if (!$product) {
+                error_log('Order::validateStock - Product not found for OrderItem: ' . $item->ID);
+                return false;
+            }
+            
+            if ($product->Stok < $item->Quantity) {
+                error_log('Order::validateStock - Insufficient stock for product: ' . $product->ID . 
+                         ' (Available: ' . $product->Stok . ', Required: ' . $item->Quantity . ')');
+                return false;
             }
         }
+        
+        return true;
+    }
+
+    /**
+     * Reduce stock for all products in the order
+     */
+    private function reduceStock()
+    {
+        $orderItems = $this->OrderItem();
+        $updatedProducts = [];
+        
+        try {
+            foreach ($orderItems as $item) {
+                $product = $item->Product();
+                if (!$product) {
+                    throw new Exception('Product not found for OrderItem: ' . $item->ID);
+                }
+                
+                // Validasi stok sekali lagi sebelum pengurangan
+                if ($product->Stok < $item->Quantity) {
+                    throw new Exception('Insufficient stock for product: ' . $product->Name . 
+                                      ' (Available: ' . $product->Stok . ', Required: ' . $item->Quantity . ')');
+                }
+                
+                // Kurangi stok
+                $oldStock = $product->Stok;
+                $product->Stok = $product->Stok - $item->Quantity;
+                $product->write();
+                
+                $updatedProducts[] = [
+                    'product' => $product,
+                    'oldStock' => $oldStock,
+                    'quantity' => $item->Quantity
+                ];
+                
+                error_log('Order::reduceStock - Product: ' . $product->Name . 
+                         ' stock reduced from ' . $oldStock . ' to ' . $product->Stok);
+            }
+            
+            return true;
+            
+        } catch (Exception $e) {
+            error_log('Order::reduceStock - Error: ' . $e->getMessage());
+            
+            // Rollback: kembalikan stok yang sudah dikurangi
+            foreach ($updatedProducts as $productData) {
+                $product = $productData['product'];
+                $product->Stok = $productData['oldStock'];
+                $product->write();
+                error_log('Order::reduceStock - Rollback: Product ' . $product->Name . 
+                         ' stock restored to ' . $productData['oldStock']);
+            }
+            
+            return false;
+        }
+    }
+
+    /**
+     * Restore stock when order is cancelled (only if stock was already reduced)
+     */
+    private function restoreStock()
+    {
+        $orderItems = $this->OrderItem();
+        
+        foreach ($orderItems as $item) {
+            $product = $item->Product();
+            if ($product) {
+                $oldStock = $product->Stok;
+                $product->Stok = $product->Stok + $item->Quantity;
+                $product->write();
+                
+                error_log('Order::restoreStock - Product: ' . $product->Name . 
+                         ' stock restored from ' . $oldStock . ' to ' . $product->Stok);
+            }
+        }
+        
+        $this->StockReduced = false;
     }
 
     /**

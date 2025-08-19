@@ -93,7 +93,7 @@ class PaymentController extends PageController
         if ($request->isPOST()) {
             $rawBody = $request->getBody();
             $data = json_decode($rawBody, true);
-            
+
             // If JSON decode fails, try getting from POST data
             if (!$data) {
                 $data = $request->postVars();
@@ -145,7 +145,7 @@ class PaymentController extends PageController
         if ($resultCode == '00') {
             $transaction->Status = 'success';
             $order->markAsPaid();
-            
+
             error_log('PaymentController::callback - Payment success for order: ' . $order->ID);
             $this->sendPaymentSuccessNotification($order);
 
@@ -160,7 +160,7 @@ class PaymentController extends PageController
         }
 
         $transaction->write();
-        
+
         return new HTTPResponse('OK', 200);
     }
 
@@ -184,7 +184,7 @@ class PaymentController extends PageController
         if (!$transaction) {
             // Try to find order by OrderCode if transaction not found
             $order = Order::get()->filter('OrderCode', $merchantOrderId)->first();
-            
+
             if ($order) {
                 // Create transaction record if it doesn't exist
                 $transaction = PaymentTransaction::create();
@@ -226,7 +226,7 @@ class PaymentController extends PageController
             $request->getSession()->set('PaymentError', 'Pembayaran gagal atau dibatalkan. Pesanan telah dibatalkan.');
             error_log('PaymentController::return - Payment failed for order: ' . $order->ID);
         }
-        
+
         return $this->redirect(Director::absoluteBaseURL() . '/order/detail/' . $order->ID);
     }
 

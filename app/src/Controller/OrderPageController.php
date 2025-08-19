@@ -81,12 +81,8 @@ class OrderPageController extends PageController
                 continue;
             }
             
-            $existingReview = Review::get()->filter([
-                'ProductID' => $item->ProductID,
-                'MemberID' => $this->getCurrentUser()->ID
-            ])->first();
-
-            $canReview = ($order->Status == 'completed') && !$existingReview;
+            $existingReview = $item->getReview();
+            $canReview = $item->canBeReviewed();
             
             $itemData = new stdClass();
             $itemData->ID = $item->ID;
@@ -198,13 +194,8 @@ class OrderPageController extends PageController
             return $this->redirectBack();
         }
 
-        $existingReview = Review::get()->filter([
-            'ProductID' => $orderItem->ProductID,
-            'MemberID' => $this->getCurrentUser()->ID
-        ])->first();
-
-        if ($existingReview) {
-            $this->getRequest()->getSession()->set('ReviewError', 'Anda sudah memberikan review untuk produk ini');
+        if ($orderItem->hasReview()) {
+            $this->getRequest()->getSession()->set('ReviewError', 'Item pesanan ini sudah direview');
             return $this->redirectBack();
         }
 
@@ -224,6 +215,7 @@ class OrderPageController extends PageController
         $review = Review::create();
         $review->ProductID = $orderItem->ProductID;
         $review->MemberID = $this->getCurrentUser()->ID;
+        $review->OrderItemID = $orderItem->ID;
         $review->Rating = $rating;
         $review->Message = $message;
         $review->write();

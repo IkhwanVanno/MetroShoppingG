@@ -77,7 +77,7 @@
             <% if Review && Review.Count > 0 %>
                 <% loop Review %>
                 <div class="mb-4 border rounded p-3">
-                    <strong><% if $Users %>$Users.Username<% else %>Anonymous<% end_if %></strong> 
+                    <strong><% if $Member %>$Member.FirstName<% else %>Anonymous<% end_if %></strong> 
                     <span class="text-warning">★ $Rating</span>
                     <p class="mb-0">
                         <% if $Message %>$Message<% else %>No comment<% end_if %>

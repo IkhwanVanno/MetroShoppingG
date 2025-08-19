@@ -15,6 +15,9 @@ class OrderItem extends DataObject
         "Order" => Order::class,
         "Product" => Product::class,
     ];
+    private static $has_many = [
+        "Review" => Review::class,
+    ];
 
     /**
      * Get formatted price
@@ -31,6 +34,31 @@ class OrderItem extends DataObject
     {
         return number_format($this->Subtotal, 0, '.', '.');
     }
+
+    /**
+     * Check if this order item has been reviewed
+     */
+    public function hasReview()
+    {
+        return $this->Review()->exists();
+    }
+
+    /**
+     * Get the review for this order item
+     */
+    public function getReview()
+    {
+        return $this->Review()->first();
+    }
+
+    /**
+     * Check if this order item can be reviewed
+     */
+    public function canBeReviewed()
+    {
+        return $this->Order()->Status == 'completed' && !$this->hasReview();
+    }
+
     /**
      * Get range helper for templates
      */

@@ -315,6 +315,10 @@ $(document).ready(function() {
 
         // Show loading state on submit
         $('#submitOrderBtn').prop('disabled', true).text('Memproses...');
+
+        setTimeout(function() {
+            location.reload();
+        }, 2000);
     });
     
     // Fungsi helper untuk format number
