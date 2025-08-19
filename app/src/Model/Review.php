@@ -11,6 +11,10 @@ class Review extends DataObject
         "Rating" => "Int",
         "Message" => "Text",
         "CreatedAt" => "Datetime",
+        "ShowName" => "Boolean",
+    ];
+    private static $defaults = [
+        "ShowName" => true,
     ];
     private static $has_one = [
         "Product" => Product::class,

@@ -4,6 +4,7 @@ use SilverStripe\Control\Director;
 use SilverStripe\Control\HTTPRequest;
 use SilverStripe\Control\HTTPResponse;
 use SilverStripe\ORM\ArrayList;
+use SilverStripe\View\ArrayData;
 
 class OrderPageController extends PageController
 {
@@ -76,24 +77,32 @@ class OrderPageController extends PageController
 
         foreach ($orderItems as $item) {
             $product = Product::get()->byID($item->ProductID);
-            
+
             if (!$product) {
                 continue;
             }
-            
+
             $existingReview = $item->getReview();
             $canReview = $item->canBeReviewed();
-            
-            $itemData = new stdClass();
-            $itemData->ID = $item->ID;
-            $itemData->ProductID = $item->ProductID;
-            $itemData->Quantity = $item->Quantity;
-            $itemData->Price = $item->Price;
-            $itemData->Subtotal = $item->Subtotal;
-            $itemData->FormattedPrice = number_format($item->Price, 0, '.', '.');
-            $itemData->FormattedSubtotal = number_format($item->Subtotal, 0, '.', '.');
-            $itemData->Product = $product;
-            
+
+            $itemData = new ArrayData([
+                'ID' => $item->ID,
+                'ProductID' => $item->ProductID,
+                'Quantity' => $item->Quantity,
+                'Price' => $item->Price,
+                'Subtotal' => $item->Subtotal,
+                'FormattedPrice' => number_format($item->Price, 0, '.', '.'),
+                'FormattedSubtotal' => number_format($item->Subtotal, 0, '.', '.'),
+                'Product' => $product,
+                'RatingRange' => new ArrayList([
+                    ArrayData::create(['Value' => 5]),
+                    ArrayData::create(['Value' => 4]),
+                    ArrayData::create(['Value' => 3]),
+                    ArrayData::create(['Value' => 2]),
+                    ArrayData::create(['Value' => 1]),
+                ])
+            ]);
+
             $itemsWithReviewStatus[] = [
                 'Item' => $itemData,
                 'HasReview' => $existingReview ? true : false,
@@ -173,7 +182,7 @@ class OrderPageController extends PageController
 
         $orderID = $request->param('OrderID');
         $orderItemID = $request->param('OrderItemID');
-        
+
         $order = Order::get()->filter([
             'ID' => $orderID,
             'MemberID' => $this->getCurrentUser()->ID
@@ -201,6 +210,7 @@ class OrderPageController extends PageController
 
         $rating = (int) $request->postVar('rating');
         $message = trim($request->postVar('message'));
+        $showname = (bool) $request->postVar('showname');
 
         if (!$rating || $rating < 1 || $rating > 5) {
             $this->getRequest()->getSession()->set('ReviewError', 'Rating harus antara 1-5');
@@ -218,6 +228,7 @@ class OrderPageController extends PageController
         $review->OrderItemID = $orderItem->ID;
         $review->Rating = $rating;
         $review->Message = $message;
+        $review->ShowName = $showname;
         $review->write();
 
         $this->getRequest()->getSession()->set('ReviewSuccess', 'Review berhasil ditambahkan');

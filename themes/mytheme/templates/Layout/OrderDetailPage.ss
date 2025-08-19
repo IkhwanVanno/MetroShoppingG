@@ -105,38 +105,32 @@
                                         <!-- Form Review -->
                                         <form action="$BaseHref/order/review/submit/$Top.Order.ID/$Item.ID" method="post" class="mt-3 p-3 bg-light rounded">
                                             <h6 class="mb-3">Berikan Review:</h6>
-
                                             <div class="mb-2">
-                                                <label class="form-label">Rating *</label>
-                                                <div>
-                                                    <div class="form-check form-check-inline">
-                                                        <input class="form-check-input" type="radio" name="rating" id="rating-$Item.ID-1" value="1" required>
-                                                        <label class="form-check-label" for="rating-$Item.ID-1">1</label>
-                                                    </div>
-                                                    <div class="form-check form-check-inline">
-                                                        <input class="form-check-input" type="radio" name="rating" id="rating-$Item.ID-2" value="2">
-                                                        <label class="form-check-label" for="rating-$Item.ID-2">2</label>
-                                                    </div>
-                                                    <div class="form-check form-check-inline">
-                                                        <input class="form-check-input" type="radio" name="rating" id="rating-$Item.ID-3" value="3">
-                                                        <label class="form-check-label" for="rating-$Item.ID-3">3</label>
-                                                    </div>
-                                                    <div class="form-check form-check-inline">
-                                                        <input class="form-check-input" type="radio" name="rating" id="rating-$Item.ID-4" value="4">
-                                                        <label class="form-check-label" for="rating-$Item.ID-4">4</label>
-                                                    </div>
-                                                    <div class="form-check form-check-inline">
-                                                        <input class="form-check-input" type="radio" name="rating" id="rating-$Item.ID-5" value="5">
-                                                        <label class="form-check-label" for="rating-$Item.ID-5">5</label>
-                                                    </div>
+                                                <label class="form-label d-block">Rating *</label>
+                                                <div class="star-rating" data-itemid="$Item.ID">
+                                                    <% loop $Item.RatingRange %>
+                                                        <span class="star" data-value="$Value">&#9733;</span>
+                                                    <% end_loop %>
+                                                    <input type="hidden" name="rating" id="rating-$Item.ID" required />
                                                 </div>
                                             </div>
-
                                             <div class="mb-3">
                                                 <label for="message-$Item.ID" class="form-label">Pesan *</label>
                                                 <textarea class="form-control" id="message-$Item.ID" name="message" rows="3" placeholder="Tulis ulasan Anda..." required minlength="5"></textarea>
                                             </div>
-
+                                            <div class="mb-3">
+                                                <label class="form-label">Tampilkan Nama Anda?</label>
+                                                <div>
+                                                    <div class="form-check form-check-inline">
+                                                        <input class="form-check-input" type="radio" name="showname" id="showname-yes-$Item.ID" value="1" checked>
+                                                        <label class="form-check-label" for="showname-yes-$Item.ID">Ya</label>
+                                                    </div>
+                                                    <div class="form-check form-check-inline">
+                                                        <input class="form-check-input" type="radio" name="showname" id="showname-no-$Item.ID" value="0">
+                                                        <label class="form-check-label" for="showname-no-$Item.ID">Tidak</label>
+                                                    </div>
+                                                </div>
+                                            </div>
                                             <button type="submit" class="btn btn-primary btn-sm">Kirim Review</button>
                                         </form>
                                     <% else %>
@@ -185,3 +179,56 @@
         </div>
     </div>
 </div>
+<style>
+    .star-rating {
+        display: flex;
+        flex-direction: row-reverse;
+        justify-content: flex-end;
+    }
+
+    .star {
+        font-size: 1.6rem;
+        color: #ccc;
+        cursor: pointer;
+        transition: color 0.2s;
+        padding: 0 3px;
+    }
+
+    .star.selected,
+    .star.hovered {
+        color: #f1c40f;
+    }
+</style>
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        document.querySelectorAll('.star-rating').forEach(function (container) {
+            const stars = container.querySelectorAll('.star');
+            const input = container.querySelector('input[name="rating"]');
+
+            stars.forEach(function (star) {
+                star.addEventListener('click', function () {
+                    const rating = this.getAttribute('data-value');
+                    input.value = rating;
+
+                    stars.forEach(function (s) {
+                        s.classList.toggle('selected', s.getAttribute('data-value') <= rating);
+                    });
+                });
+
+                // Optional: hover effect
+                star.addEventListener('mouseover', function () {
+                    const hoverValue = this.getAttribute('data-value');
+                    stars.forEach(function (s) {
+                        s.classList.toggle('hovered', s.getAttribute('data-value') <= hoverValue);
+                    });
+                });
+
+                star.addEventListener('mouseout', function () {
+                    stars.forEach(function (s) {
+                        s.classList.remove('hovered');
+                    });
+                });
+            });
+        });
+    });
+</script>
