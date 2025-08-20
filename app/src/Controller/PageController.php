@@ -16,6 +16,7 @@ namespace {
     use SilverStripe\ORM\ArrayList;
     use SilverStripe\Security\Security;
     use SilverStripe\SiteConfig\SiteConfig;
+    use SilverStripe\View\ArrayData;
 
     class PageController extends ContentController
     {
@@ -24,9 +25,22 @@ namespace {
             "ContactForm",
         ];
 
+        protected $flashMessages = null;
+        public function getFlashMessages()
+        {
+            return $this->flashMessages;
+        }
         protected function init()
         {
             parent::init();
+
+            $session = $this->getRequest()->getSession();
+            $flash = $session->get('FlashMessage');
+
+            if ($flash) {
+                $this->flashMessages = ArrayData::create($flash);
+                $session->clear('FlashMessage');
+            }
         }
 
         protected function getCommonData()

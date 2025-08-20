@@ -4,25 +4,29 @@ use SilverStripe\Control\Director;
 use SilverStripe\Control\HTTPRequest;
 use SilverStripe\Core\Environment;
 use SilverStripe\Core\Injector\Injector;
+use SilverStripe\Dev\Debug;
+use SilverStripe\ORM\ArrayList;
 use SilverStripe\ORM\ValidationResult;
 use SilverStripe\Security\IdentityStore;
 use SilverStripe\Security\Member;
 use SilverStripe\Security\MemberAuthenticator\LoginHandler;
 use SilverStripe\Security\MemberAuthenticator\MemberAuthenticator;
 use SilverStripe\SiteConfig\SiteConfig;
+use SilverStripe\View\ArrayData;
 
 class AuthPageController extends PageController
 {
     private static $allowed_actions = [
         'login',
-        'register'
+        'register',
+        'init',
     ];
 
     private static $url_handlers = [
         'login' => 'login',
         'register' => 'register'
     ];
-
+    
     public function login(HTTPRequest $request)
     {
         $validationResult = null;
@@ -31,8 +35,19 @@ class AuthPageController extends PageController
             $validationResult = $this->processLogin($request);
 
             if ($validationResult->isValid()) {
+                $this->getRequest()->getSession()->set('FlashMessage', [
+                    'Message' => 'Login successful!',
+                    'Type' => 'primary'
+                ]);
                 return $this->redirect(Director::absoluteBaseURL());
             }
+        }
+
+        if ($validationResult && !$validationResult->isValid()) {
+            $this->flashMessages = ArrayData::create([
+                'Message' => 'Login failed',
+                'Type' => 'danger'
+            ]);
         }
 
         $data = array_merge($this->getCommonData(), [
@@ -43,6 +58,7 @@ class AuthPageController extends PageController
         return $this->customise($data)->renderWith(['LoginPage', 'Page']);
     }
 
+
     public function register(HTTPRequest $request)
     {
         $validationResult = null;
@@ -51,13 +67,24 @@ class AuthPageController extends PageController
             $validationResult = $this->processRegister($request);
 
             if ($validationResult->isValid()) {
+                $this->getRequest()->getSession()->set('FlashMessage', [
+                    'Message' => 'Registration successful! Please check your email to verify your account.',
+                    'Type' => 'primary'
+                ]);
                 return $this->redirect(Director::absoluteBaseURL());
             }
         }
 
+        if ($validationResult && !$validationResult->isValid()) {
+            $this->flashMessages = ArrayData::create([
+                'Message' => 'Registration failed',
+                'Type' => 'danger'
+            ]);
+        }
+
         $data = array_merge($this->getCommonData(), [
             'Title' => 'Register',
-            'ValidationResult'=> $validationResult
+            'ValidationResult' => $validationResult
         ]);
 
         return $this->customise($data)->renderWith(['RegisterPage', 'Page']);
