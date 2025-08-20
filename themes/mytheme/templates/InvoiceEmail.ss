@@ -3,276 +3,262 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Invoice - $Order.OrderCode</title>
+  <title>Terima Kasih - $Order.OrderCode</title>
   <style>
-    @page {
-      size: A4;
-      margin: 1cm;
-    }
-
     body {
-      font-family: DejaVu Sans, Arial, sans-serif;
-      font-size: 10px;
-      line-height: 1.4;
+      font-family: Arial, Helvetica, sans-serif;
+      font-size: 14px;
+      line-height: 1.6;
       margin: 0;
       padding: 0;
+      background-color: #f4f4f4;
     }
 
     .container {
-      width: 100%;
-      max-width: 800px;
-      margin: 0 auto;
-      padding: 10px;
+      max-width: 600px;
+      margin: 20px auto;
+      background-color: #ffffff;
+      padding: 30px;
+      border-radius: 8px;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
     }
 
-    .row {
-      display: flex;
-      flex-wrap: wrap;
-      margin: 0 -5px;
-    }
-
-    .col-6 {
-      flex: 0 0 50%;
-      padding: 0 5px;
-      box-sizing: border-box;
-    }
-
-    .col-8 {
-      flex: 0 0 66.6667%;
-      padding: 0 5px;
-      box-sizing: border-box;
-    }
-
-    .col-4 {
-      flex: 0 0 33.3333%;
-      padding: 0 5px;
-      box-sizing: border-box;
-    }
-
-    .text-end {
-      text-align: right;
-    }
-
-    .text-center {
+    .header {
       text-align: center;
+      margin-bottom: 30px;
+      padding-bottom: 20px;
+      border-bottom: 2px solid #e9ecef;
     }
 
     .company-logo {
-      max-height: 40px;
-    }
-
-    .invoice-title {
-      font-size: 20px;
-      font-weight: bold;
-      color: #343a40;
-      margin-bottom: 5px;
-    }
-
-    .invoice-number {
-      font-size: 11px;
-      color: #6c757d;
-    }
-
-    h5, h6 {
-      font-size: 11px;
-      margin-bottom: 6px;
-    }
-
-    p, td, th {
-      margin: 0;
-      padding: 2px 4px;
-    }
-
-    table {
-      width: 100%;
-      border-collapse: collapse;
-    }
-
-    table th {
-      background-color: #f8f9fa;
-      border: 1px solid #dee2e6;
-      font-size: 10px;
-      text-align: left;
-    }
-
-    table td {
-      border: 1px solid #dee2e6;
-      font-size: 10px;
-    }
-
-    .table-sm td, .table-sm th {
-      padding: 4px;
-    }
-
-    .total-section {
-      background-color: #f8f9fa;
-      padding: 8px;
-      border-radius: 4px;
-    }
-
-    .footer {
-      margin-top: 20px;
-      border-top: 1px solid #dee2e6;
-      font-size: 9px;
-      color: #6c757d;
-      padding-top: 10px;
-      text-align: center;
-    }
-
-    .invoice-header {
-      margin-bottom: 20px;
-      border-bottom: 1px solid #dee2e6;
-      padding-bottom: 10px;
-    }
-
-    .invoice-details {
-      margin-bottom: 20px;
-    }
-
-    .invoice-table {
+      max-height: 60px;
       margin-bottom: 15px;
     }
 
-    .mt-4 {
-      margin-top: 12px !important;
+    .company-name {
+      font-size: 24px;
+      font-weight: bold;
+      color: #2c3e50;
+      margin-bottom: 5px;
     }
 
-    .border {
-      border: 1px solid #dee2e6;
+    .thank-you-message {
+      text-align: center;
+      margin-bottom: 30px;
     }
 
-    .p-2 {
-      padding: 8px;
+    .thank-you-title {
+      font-size: 28px;
+      color: #27ae60;
+      font-weight: bold;
+      margin-bottom: 10px;
     }
 
-    ul.list-unstyled {
+    .thank-you-text {
+      font-size: 16px;
+      color: #555555;
+    }
+
+    .order-info {
+      background-color: #f8f9fa;
+      padding: 20px;
+      border-radius: 6px;
+      margin-bottom: 25px;
+    }
+
+    .order-info h3 {
+      color: #2c3e50;
+      margin-top: 0;
+      margin-bottom: 15px;
+      font-size: 18px;
+    }
+
+    .info-row {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 8px;
+      padding: 5px 0;
+    }
+
+    .info-label {
+      font-weight: bold;
+      color: #555555;
+    }
+
+    .info-value {
+      color: #2c3e50;
+    }
+
+    .order-code {
+      font-size: 15px;
+      font-weight: bold;
+      color: #e74c3c;
+    }
+
+    .total-amount {
+      font-size: 15px;
+      font-weight: bold;
+      color: #27ae60;
+    }
+
+    .message-section {
+      margin-bottom: 25px;
+      padding: 15px;
+      background-color: #fff3cd;
+      border-left: 4px solid #ffc107;
+      border-radius: 4px;
+    }
+
+    .message-section p {
+      margin: 5px 0;
+      color: #856404;
+    }
+
+    .footer {
+      text-align: center;
+      margin-top: 30px;
+      padding-top: 20px;
+      border-top: 1px solid #e9ecef;
+      font-size: 12px;
+      color: #6c757d;
+    }
+
+    .contact-info {
+      margin-top: 15px;
+    }
+
+    .contact-info p {
+      margin: 3px 0;
+    }
+
+    .attachment-note {
+      background-color: #d1ecf1;
+      border: 1px solid #bee5eb;
+      border-radius: 4px;
+      padding: 15px;
+      margin-top: 20px;
+      text-align: center;
+    }
+
+    .attachment-note p {
       margin: 0;
-      padding-left: 18px;
-      list-style: disc;
+      color: #0c5460;
+      font-weight: bold;
     }
 
-    ul.list-unstyled li {
-      margin-bottom: 3px;
+    @media (max-width: 600px) {
+      .container {
+        margin: 10px;
+        padding: 20px;
+      }
+      
+      .info-row {
+        flex-direction: column;
+      }
+      
+      .info-label {
+        margin-bottom: 3px;
+      }
     }
-
   </style>
 </head>
 <body>
   <div class="container">
-
+    
     <!-- Header -->
-    <div class="invoice-header row">
-      <div class="col-8">
-        <% if $SiteConfig.logo %>
-          <img src="$SiteConfig.logo.URL" alt="Company Logo" class="company-logo mb-1">
-        <% end_if %>
-        <div>
-          <strong>$SiteConfig.Title</strong><br>
-          <% if $SiteConfig.Address %>$SiteConfig.Address<br><% end_if %>
-          <% if $SiteConfig.Phone %>Telp: $SiteConfig.Phone<br><% end_if %>
-          <% if $SiteConfig.Email %>Email: $SiteConfig.Email<% end_if %>
-        </div>
-      </div>
-      <div class="col-4 text-end">
-        <div class="invoice-title">INVOICE</div>
-        <div class="invoice-number">No: $InvoiceNumber</div>
-        <div>Tanggal: $InvoiceDate</div>
+    <div class="header">
+      <% if $SiteConfig.logo %>
+        <img src="$SiteConfig.logo.AbsoluteURL" alt="$SiteConfig.Title" class="company-logo">
+      <% end_if %>
+      <div class="company-name">$SiteConfig.Title</div>
+    </div>
+
+    <!-- Thank You Message -->
+    <div class="thank-you-message">
+      <div class="thank-you-title">Terima Kasih!</div>
+      <div class="thank-you-text">
+        Pembayaran Anda telah berhasil diproses.<br>
+        Kami akan segera memproses pesanan Anda.
       </div>
     </div>
 
-    <!-- Customer & Order Details -->
-    <div class="invoice-details row">
-      <div class="col-6">
-        <h6>Tagihan Untuk:</h6>
-        <div class="border p-2">
-          <strong>$Member.FirstName $Member.Surname</strong><br>
-          <% if $ShippingAddress %>
-            $ShippingAddress.ReceiverName<br>
-            $ShippingAddress.Address<br>
-            $ShippingAddress.DistrictName, $ShippingAddress.CityName<br>
-            $ShippingAddress.ProvinceName $ShippingAddress.PostalCode<br>
-            Telp: $ShippingAddress.PhoneNumber
-          <% end_if %>
-        </div>
+    <!-- Order Information -->
+    <div class="order-info">
+      <h3>Informasi Pesanan</h3>
+      
+      <div class="info-row">
+        <span class="info-label">Kode Pesanan:</span>
+        <span class="info-value order-code">$Order.OrderCode</span>
       </div>
-      <div class="col-6">
-        <h6>Detail Pesanan:</h6>
-        <table class="table-sm">
-          <tr><td>Kode Pesanan:</td><td>$Order.OrderCode</td></tr>
-          <tr><td>Tanggal Pesanan:</td><td>$Order.CreateAt.Format('Y-m-d')</td></tr>
-          <tr><td>Status:</td><td>$Order.Status</td></tr>
-          <tr><td>Metode Pembayaran:</td><td>$Order.PaymentMethod</td></tr>
-          <tr><td>Kurir:</td><td>$Order.ShippingCourier</td></tr>
-        </table>
+      
+      <div class="info-row">
+        <span class="info-label">Tanggal Pesanan:</span>
+        <span class="info-value">$Order.CreateAt.Format('Y-m-d')</span>
       </div>
+      
+      <div class="info-row">
+        <span class="info-label">Status:</span>
+        <span class="info-value">$Order.Status</span>
+      </div>
+      
+      <div class="info-row">
+        <span class="info-label">Metode Pembayaran:</span>
+        <span class="info-value">$Order.PaymentMethod</span>
+      </div>
+      
+      <div class="info-row">
+        <span class="info-label">Total Pembayaran:</span>
+        <span class="info-value total-amount">$FormattedGrandTotalWithFee</span>
+      </div>
+      
+      <% if $Order.ShippingCourier %>
+      <div class="info-row">
+        <span class="info-label">Kurir:</span>
+        <span class="info-value">$Order.ShippingCourier</span>
+      </div>
+      <% end_if %>
     </div>
 
-    <!-- Order Items Table -->
-    <div class="invoice-table">
-      <table>
-        <thead>
-          <tr>
-            <th width="5%" class="text-center">No</th>
-            <th width="40%">Nama Produk</th>
-            <th width="10%" class="text-center">Qty</th>
-            <th width="15%" class="text-end">Harga Satuan</th>
-            <th width="20%" class="text-end">Subtotal</th>
-          </tr>
-        </thead>
-        <tbody>
-          <% loop $OrderItems %>
-            <tr>
-              <td class="text-center">$Pos</td>
-              <td>$Product.Name</td>
-              <td class="text-center">$Quantity</td>
-              <td class="text-end">Rp $FormattedPrice</td>
-              <td class="text-end"><strong>Rp $FormattedSubtotal</strong></td>
-            </tr>
-          <% end_loop %>
-        </tbody>
-      </table>
+    <!-- Message Section -->
+    <div class="message-section">
+      <p><strong>Informasi Penting:</strong></p>
+      <p>â€¢ Pesanan Anda sedang diproses dan akan segera dikirim</p>
+      <p>â€¢ Anda akan menerima notifikasi ketika pesanan telah dikirim</p>
+      <p>â€¢ Invoice detail terlampir sebagai file PDF</p>
+      <% if $SiteConfig.Phone %>
+      <p>â€¢ Hubungi customer service di $SiteConfig.Phone jika ada pertanyaan</p>
+      <% end_if %>
     </div>
 
-    <!-- Total Section -->
-    <div class="row">
-      <div class="col-8"></div>
-      <div class="col-4">
-        <div class="total-section">
-          <table class="table-sm">
-            <tr><td>Subtotal Produk:</td><td class="text-end">$Order.FormattedTotalPrice</td></tr>
-            <tr><td>Ongkos Kirim:</td><td class="text-end">$Order.FormattedShippingCost</td></tr>
-            <% if $PaymentFee %>
-              <tr><td>Biaya Pembayaran:</td><td class="text-end">$FormattedPaymentFee</td></tr>
-            <% end_if %>
-            <tr>
-              <td><strong>TOTAL:</strong></td>
-              <td class="text-end"><strong>Rp $FormattedGrandTotalWithFee</strong></td>
-            </tr>
-          </table>
-        </div>
-      </div>
-    </div>
-
-    <!-- Notes -->
-    <div class="mt-4">
-      <h6>Catatan:</h6>
-      <ul class="list-unstyled">
-        <li>Invoice ini merupakan bukti pembayaran yang sah</li>
-        <li>Barang akan dikirim sesuai alamat pengiriman</li>
-        <% if $SiteConfig.Phone %>
-          <li>Hubungi CS: $SiteConfig.Phone</li>
-        <% end_if %>
-      </ul>
+    <!-- Attachment Note -->
+    <div class="attachment-note">
+      <p>ðŸ“Ž Invoice detail terlampir dalam email ini sebagai file PDF</p>
     </div>
 
     <!-- Footer -->
     <div class="footer">
       <div><strong>$SiteConfig.Title</strong></div>
-      <div>Generated otomatis pada $InvoiceDate</div>
-      <% if $SiteConfig.Credit %>
-        <div>$SiteConfig.Credit</div>
-      <% end_if %>
+      
+      <div class="contact-info">
+        <% if $SiteConfig.Address %>
+          <p>$SiteConfig.Address</p>
+        <% end_if %>
+        <% if $SiteConfig.Phone %>
+          <p>Telp: $SiteConfig.Phone</p>
+        <% end_if %>
+        <% if $SiteConfig.Email %>
+          <p>Email: $SiteConfig.Email</p>
+        <% end_if %>
+      </div>
+      
+      <div style="margin-top: 15px;">
+        <p>Email ini dikirim otomatis pada $InvoiceDate</p>
+        <% if $SiteConfig.Credit %>
+          <p>$SiteConfig.Credit</p>
+        <% end_if %>
+      </div>
     </div>
+    
   </div>
 </body>
 </html>

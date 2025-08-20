@@ -164,7 +164,7 @@
     <div class="invoice-header row">
       <div class="col-8">
         <% if $SiteConfig.logo %>
-          <img src="$SiteConfig.logo.URL" alt="Company Logo" class="company-logo mb-1">
+          <img src="$SiteConfig.logo.AbsoluteURL" alt="Company Logo" class="company-logo mb-1">
         <% end_if %>
         <div>
           <strong>$SiteConfig.Title</strong><br>
