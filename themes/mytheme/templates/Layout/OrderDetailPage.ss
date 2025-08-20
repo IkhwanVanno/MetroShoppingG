@@ -176,6 +176,27 @@
                     <p class="mb-0">$Order.ShippingAddress.CityName, $Order.ShippingAddress.ProvinceName $Order.ShippingAddress.PostalCode</p>
                 </div>
             </div>
+            <% if $Order.PaymentStatus == 'paid' %>
+                <div class="card mt-3">
+                    <div class="card-header">
+                        <h5 class="mb-0">Invoice & Dokumen</h5>
+                    </div>
+                    <div class="card-body">
+                        <p class="text-muted mb-3">Download atau kirim ulang invoice untuk pesanan ini</p>
+                        <div class="d-flex flex-wrap gap-2">
+                            <a href="$BaseHref/invoice/download/$Order.ID" class="btn btn-primary">
+                                <i class="fas fa-download me-1"></i> Download Invoice
+                            </a>
+                            <a href="$BaseHref/invoice/send/$Order.ID" class="btn btn-outline-primary">
+                                <i class="fas fa-envelope me-1"></i> Kirim ke Email
+                            </a>
+                            <a href="$BaseHref/invoice/generate/$Order.ID" target="_blank" class="btn btn-outline-secondary">
+                                <i class="fas fa-eye me-1"></i> Lihat Invoice
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            <% end_if %>
         </div>
     </div>
 </div>

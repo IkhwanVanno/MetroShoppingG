@@ -149,6 +149,14 @@ class PaymentController extends PageController
             error_log('PaymentController::callback - Payment success for order: ' . $order->ID);
             $this->sendPaymentSuccessNotification($order);
 
+            // Send invoice email automatically after successful payment
+            try {
+                InvoiceController::sendInvoiceAfterPayment($order);
+                error_log('PaymentController::callback - Invoice sent for order: ' . $order->ID);
+            } catch (Exception $e) {
+                error_log('PaymentController::callback - Failed to send invoice for order: ' . $order->ID . ' - ' . $e->getMessage());
+            }
+
         } else {
             $transaction->Status = 'failed';
             $order->Status = 'cancelled';
@@ -213,8 +221,15 @@ class PaymentController extends PageController
 
             $order->markAsPaid();
 
-            $request->getSession()->set('PaymentSuccess', 'Pembayaran berhasil! Pesanan Anda sedang diproses.');
-            error_log('PaymentController::return - Payment success for order: ' . $order->ID);
+            // Send invoice email automatically after successful payment
+            try {
+                InvoiceController::sendInvoiceAfterPayment($order);
+                $request->getSession()->set('PaymentSuccess', 'Pembayaran berhasil! Pesanan Anda sedang diproses. Invoice telah dikirim ke email Anda.');
+                error_log('PaymentController::return - Payment success and invoice sent for order: ' . $order->ID);
+            } catch (Exception $e) {
+                $request->getSession()->set('PaymentSuccess', 'Pembayaran berhasil! Pesanan Anda sedang diproses.');
+                error_log('PaymentController::return - Payment success but invoice failed for order: ' . $order->ID . ' - ' . $e->getMessage());
+            }
         } else {
             $transaction->Status = 'failed';
             $transaction->write();
