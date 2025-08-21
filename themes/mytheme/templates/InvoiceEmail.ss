@@ -222,17 +222,17 @@
     <!-- Message Section -->
     <div class="message-section">
       <p><strong>Informasi Penting:</strong></p>
-      <p>â€¢ Pesanan Anda sedang diproses dan akan segera dikirim</p>
-      <p>â€¢ Anda akan menerima notifikasi ketika pesanan telah dikirim</p>
-      <p>â€¢ Invoice detail terlampir sebagai file PDF</p>
+      <p>Pesanan Anda sedang diproses dan akan segera dikirim</p>
+      <p>Anda akan menerima notifikasi ketika pesanan telah dikirim</p>
+      <p>Invoice detail terlampir sebagai file PDF</p>
       <% if $SiteConfig.Phone %>
-      <p>â€¢ Hubungi customer service di $SiteConfig.Phone jika ada pertanyaan</p>
+      <p>Hubungi customer service di $SiteConfig.Phone jika ada pertanyaan</p>
       <% end_if %>
     </div>
 
     <!-- Attachment Note -->
     <div class="attachment-note">
-      <p>ðŸ“Ž Invoice detail terlampir dalam email ini sebagai file PDF</p>
+      <p>Invoice detail terlampir dalam email ini sebagai file PDF</p>
     </div>
 
     <!-- Footer -->
