@@ -113,7 +113,7 @@
 				/>
 				<% else %>
 				<div class="d-flex align-items-center justify-content-center h-100 bg-light">
-				<span class="text-muted">No Image Available</span>
+				<span class="text-muted">Gambar tidak tersedia</span>
 				</div>
 				<% end_if %>
 			</a>
@@ -126,11 +126,11 @@
 
 	<button class="carousel-control-prev" type="button" data-bs-target="#eventCarousel" data-bs-slide="prev">
 		<span class="carousel-control-prev-icon" aria-hidden="true"></span>
-		<span class="visually-hidden">Previous</span>
+		<span class="visually-hidden">Sebelum</span>
 	</button>
 	<button class="carousel-control-next" type="button" data-bs-target="#eventCarousel" data-bs-slide="next">
 		<span class="carousel-control-next-icon" aria-hidden="true"></span>
-		<span class="visually-hidden">Next</span>
+		<span class="visually-hidden">Selanjutnya</span>
 	</button>
 	</div>
 	</section>
@@ -155,7 +155,7 @@
 			<div>
 				<ul class="nav justify-content-center mb-4 flex-wrap">
 					<li class="nav-item">
-						<a class="nav-link active text-secondary-emphasis" href="$BaseHref/list-product">See all products</a>
+						<a class="nav-link active text-secondary-emphasis" href="$BaseHref/list-product">Lihat Semua Produk</a>
 					</li>
 				</ul>
 			</div>
@@ -182,7 +182,7 @@
 						<div class="card-body d-flex flex-column p-2">
 							<div class="d-flex flex-column flex-grow-1">
 								<h6 class="card-subtitle mb-1 text-muted" style="font-size: 0.7rem">
-									<% if $Category %>$Category.Name<% else %>General<% end_if %>
+									<% if $Category %>$Category.Name<% else %>Kategori<% end_if %>
 								</h6>
 								<h6 class="card-title mb-2" style="font-size: 0.8rem; line-height: 1.2" title="$Name">
 									<% if $Name.Length > 20 %>$Name.LimitCharacters(20)...<% else %>$Name<% end_if %>
@@ -195,7 +195,7 @@
 									<% else %>
 									<span class="badge bg-secondary text-light me-1" style="font-size: 0.6rem">★ 0</span>
 									<% end_if %>
-									<small class="text-muted" style="font-size: 0.6rem">$Stok available</small>
+									<small class="text-muted" style="font-size: 0.6rem">$Stok Tersedia</small>
 								</div>
 								<div class="d-flex align-items-center justify-content-between">
 									<p class="card-text fw-bold text-primary mb-0" style="font-size: 0.9rem">
@@ -217,8 +217,8 @@
 			<% if not $VerticalFilteredProducts %>
 			<div class="col-12">
 				<div class="alert alert-info text-center">
-					<h5>No products found</h5>
-					<p class="mb-0">No products available in this category.</p>
+					<h5>Produk Tidak Ada</h5>
+					<p class="mb-0">Produk Tidak Tersedia Pada Kategori Ini</p>
 				</div>
 			</div>
 			<% end_if %>
@@ -245,7 +245,7 @@
 			<div>
 				<ul class="nav justify-content-center mb-4 flex-wrap">
 					<li class="nav-item">
-						<a class="nav-link active text-secondary-emphasis" href="$BaseHref/list-product">See all products</a>
+						<a class="nav-link active text-secondary-emphasis" href="$BaseHref/list-product">Lihat Semua Produk</a>
 					</li>
 				</ul>
 			</div>
@@ -272,7 +272,7 @@
 					<div class="card-body d-flex flex-column justify-content-between p-2">
 						<div>
 							<h6 class="text-muted mb-1" style="font-size: 0.7rem">
-								<% if $Category %>$Category.Name<% else %>General<% end_if %>
+								<% if $Category %>$Category.Name<% else %>Kategori<% end_if %>
 							</h6>
 							<h6 class="card-title mb-2" style="font-size: 0.9rem; line-height: 1.2" title="$Name">
 								<% if $Name.Length > 25 %>$Name.Left(25)...<% else %>$Name<% end_if %>
@@ -307,8 +307,8 @@
 			<% if not $HorizontalFilteredProducts %>
 			<div class="col-12">
 				<div class="alert alert-info text-center">
-					<h5>No products found</h5>
-					<p class="mb-0">No products available in this category.</p>
+					<h5>Produk Tidak Ada</h5>
+					<p class="mb-0">Produk Tidak Tersedia Pada Kategori Ini</p>
 				</div>
 			</div>
 			<% end_if %>

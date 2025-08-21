@@ -39,22 +39,22 @@
                         
                         <hr class="my-4">
                         
-                        <h5 class="mb-3">Ubah Password (Opsional)</h5>
+                        <h5 class="mb-3">Ubah Sandi (Opsional)</h5>
                         
                         <div class="mb-3">
-                            <label for="current_password" class="form-label">Password Saat Ini</label>
+                            <label for="current_password" class="form-label">Sandi Saat Ini</label>
                             <input type="password" class="form-control" id="current_password" name="current_password">
-                            <small class="form-text text-muted">Diperlukan jika ingin mengubah password</small>
+                            <small class="form-text text-muted">Diperlukan jika ingin mengubah Sandi</small>
                         </div>
                         
                         <div class="mb-3">
-                            <label for="new_password" class="form-label">Password Baru</label>
+                            <label for="new_password" class="form-label">Sandi Baru</label>
                             <input type="password" class="form-control" id="new_password" name="new_password">
                             <small class="form-text text-muted">Minimal 8 karakter</small>
                         </div>
                         
                         <div class="mb-3">
-                            <label for="confirm_password" class="form-label">Konfirmasi Password Baru</label>
+                            <label for="confirm_password" class="form-label">Konfirmasi Sandi Baru</label>
                             <input type="password" class="form-control" id="confirm_password" name="confirm_password">
                         </div>
                         

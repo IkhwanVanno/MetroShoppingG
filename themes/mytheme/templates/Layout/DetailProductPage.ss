@@ -20,17 +20,17 @@
         
     <!-- Product Details -->
     <div class="col-md-6">
-        <p class="text-muted mb-1">Category: <strong><% if $Product.Category %>$Product.Category.Name<% else %>General<% end_if %></strong></p>
+        <p class="text-muted mb-1">Kategori: <strong><% if $Product.Category %>$Product.Category.Name<% else %>Kategori<% end_if %></strong></p>
         <h3 class="mb-2">$Product.Name</h3>
         
         <!-- Rating -->
         <div class="mb-2">
             <% if $Product.AverageRating %>
             <span class="text-warning">★ $Product.AverageRating</span>
-            <span class="text-muted">($Product.Review.Count Reviews)</span>
+            <span class="text-muted">($Product.Review.Count Ulasan)</span>
             <% else %>
             <span class="text-warning">★ 0</span>
-            <span class="text-muted">(0 Reviews)</span>
+            <span class="text-muted">(0 Ulasan)</span>
             <% end_if %>
         </div>
 
@@ -45,12 +45,12 @@
         </div>
 
         <!-- Stock -->
-        <p class="mb-3">Available stock: <strong>$Product.Stok</strong> units</p>
+        <p class="mb-3">Stok tersedia: <strong>$Product.Stok</strong> Satuan</p>
 
         <!-- Action Buttons -->
         <div class="d-flex flex-wrap gap-2">
-            <a href="$BaseHref/favorite/add/$Product.ID" class="btn btn-danger flex-fill">+ Favorite</a>
-            <a href="$BaseHref/cart/add/$Product.ID" class="btn btn-primary flex-fill">+ Cart</a>
+            <a href="$BaseHref/favorite/add/$Product.ID" class="btn btn-danger flex-fill">+ Favorit</a>
+            <a href="$BaseHref/cart/add/$Product.ID" class="btn btn-primary flex-fill">+ Keranjang</a>
         </div>
     </div>
     <% end_if %>
@@ -73,20 +73,20 @@
     <!-- Reviews -->
     <div class="row">
         <div class="col-12">
-            <h5 class="mb-3">Customer Reviews</h5>
+            <h5 class="mb-3">Ulasan Pelanggan</h5>
             <% if Review && Review.Count > 0 %>
                 <% loop Review %>
                 <div class="mb-4 border rounded p-3">
-                    <strong><% if $ShowName == true %>$Member.FirstName $Member.Surname<% else %>Anonymous<% end_if %></strong> 
+                    <strong><% if $ShowName == true %>$Member.FirstName $Member.Surname<% else %>Anonim<% end_if %></strong> 
                     <span class="text-warning">★ $Rating</span>
                     <p class="mb-0">
-                        <% if $Message %>$Message<% else %>No comment<% end_if %>
+                        <% if $Message %>$Message<% else %>Tidak ada komentar<% end_if %>
                     </p>
                 </div>
                 <% end_loop %>
             <% else %>
                 <div class="alert alert-info">
-                    <p class="mb-0">No reviews yet for this product.</p>
+                    <p class="mb-0">Belum ada ulasan untuk produk ini.</p>
                 </div>
             <% end_if %>
         </div>

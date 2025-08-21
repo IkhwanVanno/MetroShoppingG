@@ -167,8 +167,8 @@
     
     <!-- Header -->
     <div class="header">
-      <% if $SiteConfig.logo %>
-        <img src="$SiteConfig.logo.AbsoluteURL" alt="$SiteConfig.Title" class="company-logo">
+      <% if $LogoCID %>
+        <img src="$LogoCID" alt="$SiteConfig.Title" class="company-logo" style="max-height: 60px; display: block; margin: 0 auto 15px auto;">
       <% end_if %>
       <div class="company-name">$SiteConfig.Title</div>
     </div>

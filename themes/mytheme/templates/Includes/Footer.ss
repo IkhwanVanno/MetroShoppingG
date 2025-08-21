@@ -6,7 +6,7 @@
 	<div class="col-lg-6 mb-4">
 		<!-- Logo Brand -->
 		<h5 class="mb-4 text-center">
-		Trusted by Top Brands
+		Dipercaya oleh Merek Terkemuka
 		</h5>
 		<div
 		class="row row-cols-3 row-cols-sm-4 row-cols-md-5 g-3 justify-content-center mb-4"
@@ -77,7 +77,7 @@
 
 	<!-- Kolom Kanan: Formulir -->
 	<div class="col-lg-6">
-		<h5 class="mb-3 text-center text-lg-start">Contact Us</h5>
+		<h5 class="mb-3 text-center text-lg-start">Hubungi Kami</h5>
 		$ContactForm
 	</div>
 	</div>
@@ -90,7 +90,7 @@
 	<div class="row g-4">
 	<!-- Contact Information -->
 	<div class="col-12 col-md-4">
-		<h4 class="fw-bold">Contact Information</h4>
+		<h4 class="fw-bold">Informasi Kontak</h4>
 		<div class="d-flex align-items-center gap-2 mb-2">
 		<img
 			style="width: 50px"
@@ -98,7 +98,7 @@
 			alt="support"
 		/>
 		<div>
-			<p class="text-muted mb-0">Got Question? Call us 24/7</p>
+			<p class="text-muted mb-0">Ada Pertanyaan? Hubungi kami 24/7</p>
 			<% if CustomSiteConfig.Phone %>
 				<h5 class="fw-bold mb-0">$CustomSiteConfig.Phone</h5>
 			<% end_if %>
@@ -114,7 +114,7 @@
 
 	<!-- Get to Know Us -->
 	<div class="col-6 col-md-2">
-		<h5 class="fw-bold">Delivery Method</h5>
+		<h5 class="fw-bold">Metode Pengiriman</h5>
 		<ul class="list-unstyled">
 		<% loop DeliveryMethod %>
 			<li>$Name</li>
@@ -124,7 +124,7 @@
 
 	<!-- Our Social Media -->
 	<div class="col-6 col-md-2">
-		<h5 class="fw-bold">Follow Us</h5>
+		<h5 class="fw-bold">Ikuti Kami</h5>
 		<ul class="list-unstyled">
 		<% loop SocialMedia %>
 			<li>$Name</li>	
@@ -134,7 +134,7 @@
 
 	<!-- Payment Method -->
 	<div class="col-12 col-md-4">
-		<h5 class="fw-bold">Payment Method</h5>
+		<h5 class="fw-bold">Metode Pembayaran</h5>
 		<ul class="list-unstyled">
 		<% loop PaymentMethod %>
 			<li>$Name</li>

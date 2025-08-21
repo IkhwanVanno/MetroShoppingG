@@ -12,13 +12,13 @@
     <!-- Info Event -->
     <div class="container py-5">
     <h2 class="mb-3">$EventShop.Name</h2>
-    <p class="text-muted">Start: $EventShop.StartDate, End: $EventShop.EndDate </p>
+    <p class="text-muted">Mulai: $EventShop.StartDate, Berakhir: $EventShop.EndDate </p>
     <p>$EventShop.Description</p>
     </div>
 
     <!-- Produk Terkait Event -->
     <div class="container pb-5">
-    <h4 class="mb-4">Product Event</h4>
+    <h4 class="mb-4">Acara</h4>
     <div class="row row-cols-2 row-cols-sm-3 row-cols-md-4 row-cols-lg-5 g-4">
         <% loop $EventShop.Product %>
             <!-- Product Card -->
@@ -40,7 +40,7 @@
                     <div class="card-body d-flex flex-column p-2">
                         <div class="d-flex flex-column flex-grow-1">
                             <h6 class="card-subtitle mb-1 text-muted" style="font-size: 0.7rem">
-                                <% if $Category %>$Category.Name<% else %>General<% end_if %>
+                                <% if $Category %>$Category.Name<% else %>Kategori<% end_if %>
                             </h6>
                             <h6 class="card-title mb-2" style="font-size: 0.8rem; line-height: 1.2" title="$Name">
                             <% if $Name.Length > 20 %>$Name.LimitCharacters(20)...<% else %>$Name<% end_if %>
@@ -53,7 +53,7 @@
                             <% else %>
                             <span class="badge bg-secondary text-light me-1" style="font-size: 0.6rem">★ 0</span>
                             <% end_if %>
-                            <small class="text-muted" style="font-size: 0.6rem">$Stok available</small>
+                            <small class="text-muted" style="font-size: 0.6rem">$Stok Tersedia</small>
                         </div>
                         <div class="d-flex align-items-center justify-content-between">
                             <!-- Display Price -->

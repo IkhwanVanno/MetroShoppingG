@@ -1,5 +1,5 @@
 <main class="container py-5">
-    <h3 class="mb-4">My Favorites</h3>
+    <h3 class="mb-4">Favoritku</h3>
 
     <% if Favorites && Favorites.Count > 0 %>
         <% loop Favorites %>
@@ -17,13 +17,13 @@
                 <!-- Product Info -->
                 <div class="col-md-6">
                     <div class="card-body">
-                        <p class="mb-1 text-muted">Category: <% if $Product.Category %>$Product.Category.Name<% else %>General<% end_if %></p>
+                        <p class="mb-1 text-muted">Kategori: <% if $Product.Category %>$Product.Category.Name<% else %>Kategori<% end_if %></p>
                         <h5 class="card-title mb-1">$Product.Name</h5>
                         <p class="mb-1 text-warning">
                             <% if $Product.AverageRating %>
-                                ★ $Product.AverageRating <span class="text-muted">($Product.Review.Count reviews)</span>
+                                ★ $Product.AverageRating <span class="text-muted">($Product.Review.Count Ulasan)</span>
                             <% else %>
-                                ★ 0 <span class="text-muted">(0 reviews)</span>
+                                ★ 0 <span class="text-muted">(0 Ulasan)</span>
                             <% end_if %>
                         </p>
                         <% if $Product.hasDiscount %>
@@ -38,8 +38,8 @@
                 <!-- Actions -->
                 <div class="col-md-3 text-end pe-3">
                     <div class="d-flex flex-column gap-2">
-                        <a href="$BaseHref/list-product/view/$Product.ID" class="btn btn-sm btn-primary w-100">View Details</a>
-                        <a href="$BaseHref/favorite/remove/$ID" class="btn btn-sm btn-outline-danger w-100">Remove</a>
+                        <a href="$BaseHref/list-product/view/$Product.ID" class="btn btn-sm btn-primary w-100">Lihat Detail</a>
+                        <a href="$BaseHref/favorite/remove/$ID" class="btn btn-sm btn-outline-danger w-100">Hapus</a>
                     </div>
                 </div>
             </div>
@@ -47,9 +47,9 @@
         <% end_loop %>
     <% else %>
         <div class="text-center py-5">
-            <h5>No favorite products yet</h5>
-            <p class="text-muted">Please add products to favorites first</p>
-            <a href="$BaseHref" class="btn btn-primary">Shop Now</a>
+            <h5>Belum ada produk favorit.</h5>
+            <p class="text-muted">Silakan tambahkan produk ke favorit terlebih dahulu.</p>
+            <a href="$BaseHref" class="btn btn-primary">Belanja Sekarang</a>
         </div>
     <% end_if %>
 </main>

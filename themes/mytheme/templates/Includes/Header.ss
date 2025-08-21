@@ -43,11 +43,11 @@
 						<% if $ID == $Up.CategoryFilter %>$Name<% end_if %>
 					<% end_loop %>
 				<% else %>
-				All Categories
+				Semua Kategori
 				<% end_if %>
 			</button>
 			<ul class="dropdown-menu dropdown-menu-end">
-				<li><a class="dropdown-item" href="$BaseHref/list-product">All</a></li>
+				<li><a class="dropdown-item" href="$BaseHref/list-product">Semua</a></li>
 				<% loop $Category %>
 				<li><a class="dropdown-item" href="$BaseHref/list-product?category=$ID">$Name</a></li>
 				<% end_loop %>
@@ -110,14 +110,14 @@
 			<ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userDropdown">
 			<% if $IsLoggedIn %>
 				<!-- Jika sudah login -->
-				<li><a class="dropdown-item" href="$BaseHref/profile">Profile</a></li>
-				<li><a class="dropdown-item" href="$BaseHref/order">Order</a></li>
+				<li><a class="dropdown-item" href="$BaseHref/profile">Profil</a></li>
+				<li><a class="dropdown-item" href="$BaseHref/order">Pesanan</a></li>
 				<li><hr class="dropdown-divider"></li>
-				<li><a class="dropdown-item" href="$BaseHref/Security/logout">Logout</a></li>
+				<li><a class="dropdown-item" href="$BaseHref/Security/logout">Keluar</a></li>
 			<% else %>
 				<!-- Jika belum login -->
-				<li><a class="dropdown-item" href="$BaseHref/auth/login">Login</a></li>
-				<li><a class="dropdown-item" href="$BaseHref/auth/register">Register</a></li>
+				<li><a class="dropdown-item" href="$BaseHref/auth/login">Masuk</a></li>
+				<li><a class="dropdown-item" href="$BaseHref/auth/register">Daftar</a></li>
 			<% end_if %>
 			</ul>
 		</div>

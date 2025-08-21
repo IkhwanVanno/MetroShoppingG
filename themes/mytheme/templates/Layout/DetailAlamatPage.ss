@@ -137,7 +137,7 @@
 
     <!-- Tombol kembali -->
     <div class="mt-3">
-        <a href="$BaseHref/checkout" class="btn btn-secondary">Kembali ke Checkout</a>
+        <a href="$BaseHref/checkout" class="btn btn-secondary">Kembali ke Proses Pemabayaran</a>
     </div>
 </main>
 

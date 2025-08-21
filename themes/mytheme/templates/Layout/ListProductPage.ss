@@ -26,7 +26,7 @@
                             <div class="card-body d-flex flex-column p-2">
                                 <div class="d-flex flex-column flex-grow-1">
                                     <h6 class="card-subtitle mb-1 text-muted" style="font-size: 0.7rem">
-                                        <% if $Category %>$Category.Name<% else %>General<% end_if %>
+                                        <% if $Category %>$Category.Name<% else %>Kategori<% end_if %>
                                     </h6>
                                     <h6 class="card-title mb-2" style="font-size: 0.8rem; line-height: 1.2" title="$Name">
                                     <% if $Name.Length > 20 %>$Name.LimitCharacters(20)...<% else %>$Name<% end_if %>
@@ -39,7 +39,7 @@
                                     <% else %>
                                     <span class="badge bg-secondary text-light me-1" style="font-size: 0.6rem">★ 0</span>
                                     <% end_if %>
-                                    <small class="text-muted" style="font-size: 0.6rem">$Stok available</small>
+                                    <small class="text-muted" style="font-size: 0.6rem">$Stok Tersedia</small>
                                 </div>
                                 <div class="d-flex align-items-center justify-content-between">
                                     <!-- Display Price -->
@@ -75,8 +75,8 @@
             <div class="row">
                 <div class="col-12">
                     <div class="alert alert-info text-center">
-                        <h5>No products found</h5>
-                        <p class="mb-0">No products available in this category or products are out of stock.</p>
+                        <h5>Produk Tidak Ada</h5>
+                        <p class="mb-0">Produk Tidak Tersedia Pada Kategori Ini</p>
                     </div>
                 </div>
             </div>

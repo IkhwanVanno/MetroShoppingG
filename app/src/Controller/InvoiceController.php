@@ -5,6 +5,7 @@ use SilverStripe\Control\Email\Email;
 use SilverStripe\Control\HTTPRequest;
 use SilverStripe\Control\HTTPResponse;
 use SilverStripe\Core\Environment;
+use SilverStripe\Dev\Debug;
 use SilverStripe\SiteConfig\SiteConfig;
 use Dompdf\Dompdf;
 use Dompdf\Options;
@@ -190,6 +191,31 @@ class InvoiceController extends PageController
                     'application/pdf'
                 );
 
+            if ($SiteConfig->logo && $SiteConfig->logo->exists()) {
+                $logoName = $SiteConfig->logo->Name;
+                $fullLogoPath = BASE_PATH . '/public/assets/Uploads/' . $logoName;
+
+                if (file_exists($fullLogoPath)) {
+                    $logoData = file_get_contents($fullLogoPath);
+                    $imageInfo = getimagesize($fullLogoPath);
+                    $logoMimeType = $imageInfo['mime'] ?? 'image/png';
+                    $logoExtension = pathinfo($logoName, PATHINFO_EXTENSION);
+                    $logoFilename = 'company-logo.' . $logoExtension;
+
+                    $email->addAttachmentFromData(
+                        $logoData,
+                        $logoFilename,
+                        $logoMimeType,
+                    );
+
+                    $emailData['LogoCID'] = 'cid:' . $logoFilename;
+                    error_log('Logo attached as inline with CID: ' . $emailData['LogoCID']);
+                } else {
+                    error_log('Logo file not found: ' . $fullLogoPath);
+                }
+            }
+
+            $email->setData($emailData);
             $email->send();
 
             if (file_exists($tempFile)) {

@@ -16,7 +16,7 @@
             </div>
             <% end_if %>
 
-            <a href="$BaseHref/auth/login" class="btn btn-primary mt-3">Login</a>
+            <a href="$BaseHref/auth/login" class="btn btn-primary mt-3">Masuk</a>
         </div>
         </div>
     </div>

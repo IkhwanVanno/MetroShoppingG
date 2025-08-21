@@ -1,5 +1,5 @@
 <main class="container my-4">
-    <h3 class="mb-4">Checkout</h3>
+    <h3 class="mb-4">Proses Pembayaran</h3>
     
     <% if $Session.CheckoutError %>
     <div class="alert alert-danger alert-dismissible fade show" role="alert">

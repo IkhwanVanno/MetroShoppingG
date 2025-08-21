@@ -65,7 +65,7 @@
                                                 <img src="$Item.Product.Image.URL" alt="$Item.Product.Name" class="me-2 rounded" style="width:50px; height:50px; object-fit:cover;">
                                             <% else %>
                                                 <div class="me-2 bg-light rounded d-flex align-items-center justify-content-center" style="width:50px; height:50px;">
-                                                    <small class="text-muted">No Image</small>
+                                                    <small class="text-muted">Gambar Tidak Ada</small>
                                                 </div>
                                             <% end_if %>
                                             </a>
@@ -80,7 +80,7 @@
                                     <% if $HasReview %>
                                         <!-- Review yang sudah ada -->
                                         <div class="mt-3 p-3 bg-light rounded">
-                                            <h6 class="mb-2">Review Anda:</h6>
+                                            <h6 class="mb-2">Ulasan Anda:</h6>
                                             <div class="mb-2">
                                                 <strong>Rating:</strong>
                                                 <% if $Review.Rating >= 1 %><span class="text-warning">★</span><% end_if %>
@@ -99,12 +99,12 @@
                                                 <strong>Pesan:</strong><br>
                                                 $Review.Message
                                             </div>
-                                            <small class="text-muted">Direview pada: $Review.FormattedDate</small>
+                                            <small class="text-muted">Diulas pada: $Review.FormattedDate</small>
                                         </div>
                                     <% else_if $CanReview %>
                                         <!-- Form Review -->
                                         <form action="$BaseHref/order/review/submit/$Top.Order.ID/$Item.ID" method="post" class="mt-3 p-3 bg-light rounded">
-                                            <h6 class="mb-3">Berikan Review:</h6>
+                                            <h6 class="mb-3">Berikan Ulasan:</h6>
                                             <div class="mb-2">
                                                 <label class="form-label d-block">Rating *</label>
                                                 <div class="star-rating" data-itemid="$Item.ID">
@@ -131,11 +131,11 @@
                                                     </div>
                                                 </div>
                                             </div>
-                                            <button type="submit" class="btn btn-primary btn-sm">Kirim Review</button>
+                                            <button type="submit" class="btn btn-primary btn-sm">Kirim Ulasan</button>
                                         </form>
                                     <% else %>
                                         <div class="mt-3 p-2 bg-secondary bg-opacity-10 rounded">
-                                            <small class="text-muted">Review hanya tersedia setelah pesanan selesai</small>
+                                            <small class="text-muted">Ulasan hanya tersedia setelah pesanan selesai</small>
                                         </div>
                                     <% end_if %>
                                 </li>
@@ -179,19 +179,19 @@
             <% if $Order.PaymentStatus == 'paid' %>
                 <div class="card mt-3">
                     <div class="card-header">
-                        <h5 class="mb-0">Invoice & Dokumen</h5>
+                        <h5 class="mb-0">Tagihan & Dokumen</h5>
                     </div>
                     <div class="card-body">
-                        <p class="text-muted mb-3">Download atau kirim ulang invoice untuk pesanan ini</p>
+                        <p class="text-muted mb-3">Unduh atau kirim ulang Tagihan untuk pesanan ini</p>
                         <div class="d-flex flex-wrap gap-2">
                             <a href="$BaseHref/invoice/download/$Order.ID" class="btn btn-primary">
-                                <i class="fas fa-download me-1"></i> Download Invoice
+                                <i class="fas fa-download me-1"></i> Download Tagihan
                             </a>
                             <a href="$BaseHref/invoice/send/$Order.ID" class="btn btn-outline-primary">
                                 <i class="fas fa-envelope me-1"></i> Kirim ke Email
                             </a>
                             <a href="$BaseHref/invoice/generate/$Order.ID" target="_blank" class="btn btn-outline-secondary">
-                                <i class="fas fa-eye me-1"></i> Lihat Invoice
+                                <i class="fas fa-eye me-1"></i> Lihat Tagihan
                             </a>
                         </div>
                     </div>
