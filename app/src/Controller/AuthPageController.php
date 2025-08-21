@@ -36,7 +36,7 @@ class AuthPageController extends PageController
 
             if ($validationResult->isValid()) {
                 $this->getRequest()->getSession()->set('FlashMessage', [
-                    'Message' => 'Login successful!',
+                    'Message' => 'Masuk berhasil! Selamat datang.',
                     'Type' => 'primary'
                 ]);
                 return $this->redirect(Director::absoluteBaseURL());
@@ -45,7 +45,7 @@ class AuthPageController extends PageController
 
         if ($validationResult && !$validationResult->isValid()) {
             $this->flashMessages = ArrayData::create([
-                'Message' => 'Login failed',
+                'Message' => 'Masuk gagal. Periksa email dan password Anda.',
                 'Type' => 'danger'
             ]);
         }
@@ -68,7 +68,7 @@ class AuthPageController extends PageController
 
             if ($validationResult->isValid()) {
                 $this->getRequest()->getSession()->set('FlashMessage', [
-                    'Message' => 'Registration successful! Please check your email to verify your account.',
+                    'Message' => 'Pendaftaran berhasil! Silakan cek email untuk verifikasi akun.',
                     'Type' => 'primary'
                 ]);
                 return $this->redirect(Director::absoluteBaseURL());
@@ -77,7 +77,7 @@ class AuthPageController extends PageController
 
         if ($validationResult && !$validationResult->isValid()) {
             $this->flashMessages = ArrayData::create([
-                'Message' => 'Registration failed',
+                'Message' => 'Pendaftaran gagal',
                 'Type' => 'danger'
             ]);
         }
