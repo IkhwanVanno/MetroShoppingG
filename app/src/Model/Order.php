@@ -12,6 +12,7 @@ class Order extends DataObject
         "Status" => "Enum('pending,pending_payment,paid,processing,shipped,completed,cancelled', 'pending')",
         "TotalPrice" => "Double",
         "ShippingCost" => "Double",
+        "PaymentFee" => "Double",  // Added PaymentFee field
         "PaymentMethod" => "Varchar(255)",
         "PaymentStatus" => "Enum('unpaid,paid,failed,refunded', 'unpaid')",
         "ShippingCourier" => "Varchar(255)",
@@ -35,6 +36,7 @@ class Order extends DataObject
         "Status" => "Status Order",
         "TotalPrice" => "Total Price",
         "ShippingCost" => "Shipping Cost",
+        "PaymentFee" => "Payment Fee",  // Added to summary fields
         "PaymentMethod" => "Payment Method",
         "PaymentStatus" => "Payment Status",
         "ShippingCourier" => "Shipping Courier",
@@ -64,11 +66,11 @@ class Order extends DataObject
     }
 
     /**
-     * Get formatted total including shipping
+     * Get formatted total including shipping and payment fee
      */
     public function getGrandTotal()
     {
-        return $this->TotalPrice + $this->ShippingCost;
+        return $this->TotalPrice + $this->ShippingCost + $this->PaymentFee;
     }
 
     /**
@@ -93,6 +95,14 @@ class Order extends DataObject
     public function getFormattedShippingCost()
     {
         return 'Rp ' . number_format($this->ShippingCost, 0, '.', '.');
+    }
+
+    /**
+     * Get formatted payment fee
+     */
+    public function getFormattedPaymentFee()
+    {
+        return 'Rp ' . number_format($this->PaymentFee, 0, '.', '.');
     }
 
     /**

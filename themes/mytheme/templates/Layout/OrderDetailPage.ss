@@ -158,6 +158,7 @@
                 <div class="card-body">
                     <p class="d-flex justify-content-between"><span>Subtotal</span><span>$Order.FormattedTotalPrice</span></p>
                     <p class="d-flex justify-content-between"><span>Ongkir</span><span>$Order.FormattedShippingCost</span></p>
+                    <p class="d-flex justify-content-between"><span>Biaya Pembayaran</span><span>$Order.FormattedPaymentFee</span></p>
                     <hr>
                     <p class="d-flex justify-content-between fw-bold"><span>Total</span><span>$Order.FormattedGrandTotal</span></p>
 

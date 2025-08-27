@@ -293,6 +293,16 @@ class CheckoutPageController extends PageController
                 return $this->redirectBack();
             }
 
+            // Get payment fee from selected payment method
+            $paymentMethods = $this->getPaymentMethod();
+            $paymentFee = 0;
+            foreach ($paymentMethods as $method) {
+                if ($method->paymentMethod == $paymentMethod) {
+                    $paymentFee = (float) $method->totalFee;
+                    break;
+                }
+            }
+
             // Hitung total
             $subtotal = $this->getTotalPrice();
 
@@ -303,6 +313,7 @@ class CheckoutPageController extends PageController
             $order->Status = 'pending';
             $order->TotalPrice = $subtotal;
             $order->ShippingCost = $shippingCost;
+            $order->PaymentFee = $paymentFee; // Store payment fee
             $order->PaymentMethod = $paymentMethod;
             $order->ShippingCourier = $courierService;
             $order->PaymentStatus = 'unpaid';
