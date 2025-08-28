@@ -62,5 +62,17 @@ Change it, enhance it and most importantly enjoy it!
 	integrity="sha384-ndDqU0Gzau9qJ1lfW4pNLlhNTkCfHzAVBReH9diLvGRem5+R9g2FzA8ZGN954O5Q"
 	crossorigin="anonymous"
 ></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const toastEl = document.querySelector('.toast');
+        if (toastEl) {
+            const toast = new bootstrap.Toast(toastEl, {
+                delay: 5000, // waktu dalam milidetik (5000ms = 5 detik)
+                autohide: true
+            });
+            toast.show();
+        }
+    });
+</script>
 </body>
 </html>

@@ -20,6 +20,7 @@
     
     <div class="text-center mt-3">
       <p class="mb-0">Tidak memiliki akun? <a href="$BaseHref/auth/register">Daftar di sini</a></p>
+      <p class="mb-0">Lupa sandi ? <a href="$BaseHref/auth/forgot-password">Atur ulang sandi</a></p>
     </div>
   </form>
 </main>
