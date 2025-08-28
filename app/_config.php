@@ -8,3 +8,4 @@ if (class_exists('CustomSiteConfig')) {
 }
 
 Member::add_extension(MemberExtension::class);
+date_default_timezone_set('Asia/Jakarta');
