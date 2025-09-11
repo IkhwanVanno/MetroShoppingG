@@ -39,39 +39,14 @@ class EventShop extends DataObject
     public function getCMSFields()
     {
         $fields = parent::getCMSFields();
-        $fields->addFieldToTab(
-            "Root.Main",
-            TextField::create("Name", "Shop Name")
-        );
-        $fields->addFieldToTab(
-            "Root.Main",
-            TextareaField::create("Description", "Shop Description")
-        );
-        $fields->addFieldToTab(
-            "Root.Main",
-            TextField::create("Link", "Shop Link URL")
-        );
-        $fields->addFieldToTab(
-            "Root.Main",
-            DatetimeField::create("StartDate", "Start Date")
-        );
-        $fields->addFieldToTab(
-            "Root.Main",
-            DateTimeField::create("EndDate", "End Date")
-        );
-        $fields->addFieldToTab(
-            "Root.Main",
-            UploadField::create("Image", "Shop Image")
-        );
-        $productGrid = GridField::create(
-            'Product',
-            'Products in this Event',
-            $this->Product(),
-            GridFieldConfig_RecordEditor::create()
-        );
+        $fields->addFieldToTab("Root.Main", TextField::create("Name", "Shop Name"));
+        $fields->addFieldToTab("Root.Main", TextareaField::create("Description", "Shop Description"));
+        $fields->addFieldToTab("Root.Main", TextField::create("Link", "Shop Link URL"));
+        $fields->addFieldToTab("Root.Main", DatetimeField::create("StartDate", "Start Date"));
+        $fields->addFieldToTab("Root.Main", DateTimeField::create("EndDate", "End Date"));
+        $fields->addFieldToTab("Root.Main", UploadField::create("Image", "Shop Image"));
+        $productGrid = GridField::create('Product', 'Products in this Event', $this->Product(), GridFieldConfig_RecordEditor::create());
         $fields->addFieldToTab('Root.Products', $productGrid);
-
         return $fields;
-
     }
 }

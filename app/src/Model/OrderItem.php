@@ -20,19 +20,80 @@ class OrderItem extends DataObject
     ];
 
     /**
-     * Get formatted price
+     * Mendapatkan subtotal dengan harga asli (sebelum diskon)
+     * Menggunakan harga produk saat ini untuk perhitungan retrospektif
      */
-    public function getFormattedPrice()
+    public function getOriginalSubtotal()
     {
-        return number_format($this->Price, 0, '.', '.');
+        if ($this->Product() && $this->Product()->exists()) {
+            return $this->Product()->Price * $this->Quantity;
+        }
+
+        // Fallback jika produk sudah tidak ada
+        // Estimasi harga asli berdasarkan harga yang tersimpan
+        return $this->Price * $this->Quantity;
+    }
+
+    public function getFormattedOriginalSubtotal()
+    {
+        return 'Rp ' . number_format($this->getOriginalSubtotal(), 0, '.', '.');
     }
 
     /**
-     * Get formatted subtotal
+     * Mendapatkan total diskon produk untuk item ini
+     * Berdasarkan kondisi produk saat order dibuat
+     */
+    public function getProductDiscountTotal()
+    {
+        if ($this->Product() && $this->Product()->exists()) {
+            return $this->Product()->getProductDiscount() * $this->Quantity;
+        }
+
+        // Fallback calculation jika produk sudah tidak ada
+        $originalPrice = $this->getOriginalSubtotal() / $this->Quantity;
+        $discountAmount = max(0, $originalPrice - $this->Price);
+        return $discountAmount * $this->Quantity;
+    }
+
+    public function getFormattedProductDiscountTotal()
+    {
+        return 'Rp ' . number_format($this->getProductDiscountTotal(), 0, '.', '.');
+    }
+
+    /**
+     * Mendapatkan total diskon FlashSale untuk item ini
+     * Berdasarkan kondisi FlashSale saat order dibuat
+     */
+    public function getFlashSaleDiscountTotal()
+    {
+        if ($this->Product() && $this->Product()->exists()) {
+            return $this->Product()->getFlashSaleDiscount() * $this->Quantity;
+        }
+
+        // Untuk order lama, kita tidak bisa menghitung FlashSale retrospektif
+        // Karena FlashSale bersifat temporal
+        return 0;
+    }
+
+    public function getFormattedFlashSaleDiscountTotal()
+    {
+        return 'Rp ' . number_format($this->getFlashSaleDiscountTotal(), 0, '.', '.');
+    }
+
+    /**
+     * Format price yang tersimpan
+     */
+    public function getFormattedPrice()
+    {
+        return 'Rp ' . number_format($this->Price, 0, '.', '.');
+    }
+
+    /**
+     * Format subtotal yang tersimpan
      */
     public function getFormattedSubtotal()
     {
-        return number_format($this->Subtotal, 0, '.', '.');
+        return 'Rp ' . number_format($this->Subtotal, 0, '.', '.');
     }
 
     /**

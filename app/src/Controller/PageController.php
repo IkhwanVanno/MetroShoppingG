@@ -71,6 +71,8 @@ namespace {
 
             $products = Product::get();
 
+            $flashsale = FlashSale::get();
+
             $verticalCategoryFilter = $request->getVar('vertical_category');
             $verticalFilteredProducts = $this->getFilteredProducts($verticalCategoryFilter);
 
@@ -82,6 +84,7 @@ namespace {
                 "Category" => $categories,
                 "Contact" => $contacts,
                 "EventShop" => $eventShops,
+                "FlashSale" => $flashsale,
                 "Product" => $products,
                 "VerticalFilteredProducts" => $verticalFilteredProducts,
                 "VerticalCategoryFilter" => $verticalCategoryFilter,

@@ -43,7 +43,7 @@
                     <div class="flex-grow-1">
                         <h6 class="mb-1">$Product.Name</h6>
                         <small class="text-muted">Berat: $Product.Weight gr</small>
-                        <p class="mb-1">$Product.DisplayPrice × $Quantity</p>
+                        <p class="mb-1">$Product.FlashSalePrice × $Quantity</p>
                     </div>
                     <div class="fw-bold">$FormattedSubtotal</div>
                 </div>
@@ -121,10 +121,36 @@
         <div class="card mb-3">
             <div class="card-header fw-bold">Ringkasan Pembayaran</div>
             <div class="card-body">
+                <!-- Subtotal Asli -->
                 <div class="d-flex justify-content-between mb-2">
                     <span>Subtotal ($TotalItems items)</span>
-                    <span id="subtotalAmount">$FormattedTotalPrice</span>
+                    <span id="originalSubtotal">$FormattedOriginalTotalPrice</span>
                 </div>
+                
+                <!-- Diskon Produk -->
+                <% if $TotalProductDiscount > 0 %>
+                <div class="d-flex justify-content-between mb-2 text-danger">
+                    <span>Diskon Produk</span>
+                    <span id="productDiscount">-$FormattedTotalProductDiscount</span>
+                </div>
+                <% end_if %>
+                
+                <!-- Diskon FlashSale -->
+                <% if $TotalFlashSaleDiscount > 0 %>
+                <div class="d-flex justify-content-between mb-2 text-danger">
+                    <span>Diskon FlashSale</span>
+                    <span id="flashSaleDiscount">-$FormattedTotalFlashSaleDiscount</span>
+                </div>
+                <% end_if %>
+                
+                <!-- Subtotal setelah diskon -->
+                <% if $TotalProductDiscount > 0 || $TotalFlashSaleDiscount > 0 %>
+                <div class="d-flex justify-content-between mb-2 border-top pt-2">
+                    <span><strong>Subtotal setelah Diskon</strong></span>
+                    <span id="subtotalAfterDiscount"><strong>$FormattedTotalPrice</strong></span>
+                </div>
+                <% end_if %>
+                
                 <div class="d-flex justify-content-between mb-2">
                     <span>Ongkir</span>
                     <span id="shippingCost">Rp 0</span>
@@ -133,8 +159,9 @@
                     <span>Biaya Pembayaran</span>
                     <span id="paymentFee">Rp 0</span>
                 </div>
+                
                 <div class="d-flex justify-content-between fw-bold border-top pt-2">
-                    <span>Total</span>
+                    <span>Total Pembayaran</span>
                     <span id="totalCost">$FormattedTotalPrice</span>
                 </div>
                 

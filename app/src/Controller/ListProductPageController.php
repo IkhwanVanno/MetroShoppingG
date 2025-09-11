@@ -84,6 +84,9 @@ class ListProductPageController extends PageController
         return $this->customise($data)->renderWith(['DetailProductPage', 'Page']);
     }
 
+    /**
+     * Filter dan Sortir Produk
+     */
     public function getFilteredProducts($category = null, $search = null)
     {
         $request = $this->getRequest();
@@ -186,7 +189,7 @@ class ListProductPageController extends PageController
     }
 
     /**
-     * Get product IDs that have minimum rating
+     * Mendapatkan Produk dengan Minimum Rating
      */
     private function getProductIdsByMinRating($minRating)
     {
@@ -204,7 +207,7 @@ class ListProductPageController extends PageController
     }
 
     /**
-     * Sort products by final price (considering discounts)
+     * Sortir produk berdasarkan finalPrice
      */
     private function sortProductsByPrice($products, $direction = 'ASC')
     {
@@ -233,7 +236,7 @@ class ListProductPageController extends PageController
     }
 
     /**
-     * Sort products by rating
+     * Sortir Produk berdasarkan rating
      */
     private function sortProductsByRating($products, $direction = 'DESC')
     {

@@ -62,6 +62,12 @@ class CheckoutPageController extends PageController
             'TotalItems' => $this->getTotalItems(),
             'TotalPrice' => $this->getTotalPrice(),
             'FormattedTotalPrice' => $this->getFormattedTotalPrice(),
+            'OriginalTotalPrice' => $this->getOriginalTotalPrice(),
+            'FormattedOriginalTotalPrice' => $this->getFormattedOriginalTotalPrice(),
+            'TotalProductDiscount' => $this->getTotalProductDiscount(),
+            'FormattedTotalProductDiscount' => $this->getFormattedTotalProductDiscount(),
+            'TotalFlashSaleDiscount' => $this->getTotalFlashSaleDiscount(),
+            'FormattedTotalFlashSaleDiscount' => $this->getFormattedTotalFlashSaleDiscount(),
             'TotalWeight' => $this->getTotalWeight(),
             'PaymentMethods' => $this->getPaymentMethod(),
         ]);
@@ -346,6 +352,66 @@ class CheckoutPageController extends PageController
     }
 
     /**
+     * Menghitung total harga asli semua item di keranjang (tanpa diskon)
+     */
+    private function getOriginalTotalPrice()
+    {
+        if (!$this->isLoggedIn()) {
+            return 0;
+        }
+
+        $user = $this->getCurrentUser();
+        $cartItems = CartItem::get()->filter('MemberID', $user->ID);
+
+        $totalPrice = 0;
+        foreach ($cartItems as $item) {
+            $totalPrice += $item->getOriginalSubtotal();
+        }
+
+        return $totalPrice;
+    }
+
+    /**
+     * Menghitung total diskon produk
+     */
+    private function getTotalProductDiscount()
+    {
+        if (!$this->isLoggedIn()) {
+            return 0;
+        }
+
+        $user = $this->getCurrentUser();
+        $cartItems = CartItem::get()->filter('MemberID', $user->ID);
+
+        $totalDiscount = 0;
+        foreach ($cartItems as $item) {
+            $totalDiscount += $item->getProductDiscountTotal();
+        }
+
+        return $totalDiscount;
+    }
+
+    /**
+     * Menghitung total diskon FlashSale
+     */
+    private function getTotalFlashSaleDiscount()
+    {
+        if (!$this->isLoggedIn()) {
+            return 0;
+        }
+
+        $user = $this->getCurrentUser();
+        $cartItems = CartItem::get()->filter('MemberID', $user->ID);
+
+        $totalDiscount = 0;
+        foreach ($cartItems as $item) {
+            $totalDiscount += $item->getFlashSaleDiscountTotal();
+        }
+
+        return $totalDiscount;
+    }
+
+    /**
      * Check stock availability for cart items
      */
     private function checkStockAvailability($cartItems)
@@ -400,14 +466,6 @@ class CheckoutPageController extends PageController
     }
 
     /**
-     * Mendapatkan total harga dalam format rupiah
-     */
-    private function getFormattedTotalPrice()
-    {
-        return 'Rp ' . number_format($this->getTotalPrice(), 0, '.', '.');
-    }
-
-    /**
      * Menghitung total berat semua item di keranjang
      */
     private function getTotalWeight()
@@ -447,4 +505,38 @@ class CheckoutPageController extends PageController
 
         return $methods;
     }
+
+    /**
+     * Format total harga asli
+     */
+    private function getFormattedOriginalTotalPrice()
+    {
+        return 'Rp ' . number_format($this->getOriginalTotalPrice(), 0, '.', '.');
+    }
+
+    /**
+     * Format total diskon produk
+     */
+    private function getFormattedTotalProductDiscount()
+    {
+        return 'Rp ' . number_format($this->getTotalProductDiscount(), 0, '.', '.');
+    }
+
+    /**
+     * Format total diskon FlashSale
+     */
+    private function getFormattedTotalFlashSaleDiscount()
+    {
+        return 'Rp ' . number_format($this->getTotalFlashSaleDiscount(), 0, '.', '.');
+    }
+
+    /**
+     * Mendapatkan total harga dalam format rupiah
+     */
+    private function getFormattedTotalPrice()
+    {
+        return 'Rp ' . number_format($this->getTotalPrice(), 0, '.', '.');
+    }
+
+
 }

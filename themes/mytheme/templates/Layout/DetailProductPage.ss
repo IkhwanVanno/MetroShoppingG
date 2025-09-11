@@ -36,12 +36,22 @@
 
         <!-- Price -->
         <div class="mb-3">
-            <% if $Product.hasDiscount %>
-            <p class="mb-1">
-                <del class="text-muted">$Product.OriginalPrice</del>
-            </p>
+            <% if $Product.hasActiveFlashSale %>
+                <%-- Flash Sale Active: Show original price crossed, discount price crossed (if any), flash sale price --%>
+                <del class="text-muted">$Product.numberFormat</del><br />
+                <% if $Product.hasDiscount %>
+                    <del class="text-muted">$Product.DisplayPrice</del><br />
+                <% end_if %>
+                <h4 class="text-danger fw-bold mb-0">$Product.FlashSalePrice</h4>
+                <small class="badge bg-info">Flash Sale $Product.FlashSale.DiscountFlashSale% OFF</small>
+            <% else_if $Product.hasDiscount %>
+                <%-- Only Regular Discount: Show original price crossed, discount price --%>
+                <del class="text-muted">$Product.numberFormat</del><br />
+                <h4 class="text-danger fw-bold mb-0">$Product.DisplayPrice</h4>
+            <% else %>
+                <%-- No Discount: Show normal price --%>
+                <h4 class="text-dark fw-bold mb-0">$Product.numberFormat</h4>
             <% end_if %>
-            <h4 class="text-danger">$Product.DisplayPrice</h4>
         </div>
 
         <!-- Stock -->

@@ -122,6 +122,9 @@ class OrderPageController extends PageController
         return $this->customise($data)->renderWith(['OrderDetailPage', 'Page']);
     }
 
+    /**
+     * Membatalkan Order
+     */
     public function cancelOrder(HTTPRequest $request)
     {
         if (!$this->getCurrentUser()) {
@@ -147,7 +150,10 @@ class OrderPageController extends PageController
 
         return $this->redirect(Director::absoluteBaseURL() . '/order/detail/' . $orderID);
     }
-
+    
+    /**
+     * Merubah Status Order
+     */
     public function markAsCompleted(HTTPRequest $request)
     {
         if (!$this->getCurrentUser()) {
@@ -174,6 +180,9 @@ class OrderPageController extends PageController
         return $this->redirect(Director::absoluteBaseURL() . '/order/detail/' . $orderID);
     }
 
+    /**
+     * Submit Review Produk
+     */
     public function submitReview(HTTPRequest $request)
     {
         if (!$this->getCurrentUser()) {

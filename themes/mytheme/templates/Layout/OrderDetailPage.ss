@@ -154,13 +154,56 @@
         <!-- Payment Summary -->
         <div class="col-md-4 mb-3">
             <div class="card">
-                <div class="card-header">Ringkasan</div>
+                <div class="card-header">Ringkasan Pembayaran</div>
                 <div class="card-body">
-                    <p class="d-flex justify-content-between"><span>Subtotal</span><span>$Order.FormattedTotalPrice</span></p>
-                    <p class="d-flex justify-content-between"><span>Ongkir</span><span>$Order.FormattedShippingCost</span></p>
-                    <p class="d-flex justify-content-between"><span>Biaya Pembayaran</span><span>$Order.FormattedPaymentFee</span></p>
+                    <!-- Subtotal Asli -->
+                    <p class="d-flex justify-content-between">
+                        <span>Subtotal Asli</span>
+                        <span>$Order.FormattedOriginalTotalPrice</span>
+                    </p>
+                    
+                    <!-- Diskon Produk -->
+                    <% if $Order.getTotalProductDiscount > 0 %>
+                    <p class="d-flex justify-content-between text-success">
+                        <span>Diskon Produk</span>
+                        <span>-$Order.FormattedTotalProductDiscount</span>
+                    </p>
+                    <% end_if %>
+                    
+                    <!-- Diskon FlashSale -->
+                    <% if $Order.getTotalFlashSaleDiscount > 0 %>
+                    <p class="d-flex justify-content-between text-info">
+                        <span>Diskon FlashSale</span>
+                        <span>-$Order.FormattedTotalFlashSaleDiscount</span>
+                    </p>
+                    <% end_if %>
+                    
+                    <!-- Subtotal setelah diskon -->
+                    <% if $Order.getTotalProductDiscount > 0 || $Order.getTotalFlashSaleDiscount > 0 %>
+                    <p class="d-flex justify-content-between border-top pt-2">
+                        <span><strong>Subtotal setelah Diskon</strong></span>
+                        <span><strong>$Order.FormattedTotalPrice</strong></span>
+                    </p>
+                    <% else %>
+                    <p class="d-flex justify-content-between">
+                        <span>Subtotal</span>
+                        <span>$Order.FormattedTotalPrice</span>
+                    </p>
+                    <% end_if %>
+                    
+                    <p class="d-flex justify-content-between">
+                        <span>Ongkir</span>
+                        <span>$Order.FormattedShippingCost</span>
+                    </p>
+                    <p class="d-flex justify-content-between">
+                        <span>Biaya Pembayaran</span>
+                        <span>$Order.FormattedPaymentFee</span>
+                    </p>
                     <hr>
-                    <p class="d-flex justify-content-between fw-bold"><span>Total</span><span>$Order.FormattedGrandTotal</span></p>
+                    <p class="d-flex justify-content-between fw-bold">
+                        <span>Total Pembayaran</span>
+                        <span>$Order.FormattedGrandTotal</span>
+                    </p>
 
                     <% if $Order.canBePaid %>
                         <a href="$BaseHref/payment/initiate/$Order.ID" target="_blank" class="btn btn-success w-100 mt-2">Bayar Sekarang</a>
@@ -168,6 +211,7 @@
                 </div>
             </div>
 
+            <!-- Alamat tetap sama -->
             <div class="card mt-3">
                 <div class="card-header">Alamat</div>
                 <div class="card-body small">
@@ -177,6 +221,8 @@
                     <p class="mb-0">$Order.ShippingAddress.CityName, $Order.ShippingAddress.ProvinceName $Order.ShippingAddress.PostalCode</p>
                 </div>
             </div>
+            
+            <!-- Invoice section tetap sama -->
             <% if $Order.PaymentStatus == 'paid' %>
                 <div class="card mt-3">
                     <div class="card-header">

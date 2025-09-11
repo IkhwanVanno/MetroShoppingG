@@ -35,7 +35,10 @@ class FavoritePageController extends PageController
 
         return $this->customise($data)->renderWith(['FavoriteProductPage', 'Page']);
     }
-
+    
+    /**
+     * Menambahkan Produk ke dalam favorite
+     */
     public function add(HTTPRequest $request)
     {
         if (!$this->isLoggedIn()) {
@@ -65,6 +68,9 @@ class FavoritePageController extends PageController
         return $this->redirectBack();
     }
 
+    /**
+     * Menhapus Produk di dalam favorite
+     */
     public function remove(HTTPRequest $request)
     {
         if (!$this->isLoggedIn()) {

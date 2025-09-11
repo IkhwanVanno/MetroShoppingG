@@ -30,7 +30,13 @@
                         $DiscountPercentage
                     </span>
                     <% end_if %>
-                    
+
+                    <% if $FlashSale %>
+                    <span class="badge bg-info position-absolute" style="top: 5px; right: 5px; z-index: 1; font-size: 0.6rem;">
+                        FlashSale $FlashSale.DiscountFlashSale%
+                    </span>
+                    <% end_if %>
+
                     <% if $Image %>
                     <img src="$Image.URL" class="card-img-top" alt="$Name" style="height: 150px; object-fit: cover" />
                     <% else %>
@@ -56,15 +62,31 @@
                             <small class="text-muted" style="font-size: 0.6rem">$Stok Tersedia</small>
                         </div>
                         <div class="d-flex align-items-center justify-content-between">
-                            <!-- Display Price -->
-                            <p class="card-text fw-bold text-primary mb-0" style="font-size: 0.9rem">
-                            $DisplayPrice
-                            </p>
-                            <!-- Original Price (crossed out if discount exists) -->
-                            <% if $hasDiscount && $OriginalPrice %>
-                            <small class="text-muted text-decoration-line-through" style="font-size: 0.7rem">
-                            $OriginalPrice
-                            </small>
+                            <% if $hasActiveFlashSale %>
+                                <p class="card-text fw-bold text-primary mb-0" style="font-size: 0.9rem">
+                                    $FlashSalePrice
+                                </p>
+                                <div class="text-end">
+                                    <% if $hasDiscount %>
+                                        <small class="text-muted text-decoration-line-through d-block" style="font-size: 0.7rem">
+                                            $DisplayPrice
+                                        </small>
+                                    <% end_if %>
+                                    <small class="text-muted text-decoration-line-through d-block" style="font-size: 0.7rem">
+                                        $OriginalPrice
+                                    </small>
+                                </div>
+                            <% else_if $hasDiscount %>
+                                <p class="card-text fw-bold text-primary mb-0" style="font-size: 0.9rem">
+                                    $DisplayPrice
+                                </p>
+                                <small class="text-muted text-decoration-line-through" style="font-size: 0.7rem">
+                                    $OriginalPrice
+                                </small>
+                            <% else %>
+                                <p class="card-text fw-bold text-primary mb-0" style="font-size: 0.9rem">
+                                    $DisplayPrice
+                                </p>
                             <% end_if %>
                         </div>
                         </div>

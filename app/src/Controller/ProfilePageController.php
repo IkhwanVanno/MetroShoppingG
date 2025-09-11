@@ -50,6 +50,9 @@ class ProfilePageController extends PageController
         return $this->customise($data)->renderWith(["ProfilePage", "Page"]);
     }
 
+    /**
+     * Update Profile Member include password
+     */
     private function processProfileUpdate(HTTPRequest $request)
     {
         $user = $this->getCurrentUser();

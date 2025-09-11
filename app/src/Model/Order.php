@@ -12,7 +12,7 @@ class Order extends DataObject
         "Status" => "Enum('pending,pending_payment,paid,processing,shipped,completed,cancelled', 'pending')",
         "TotalPrice" => "Double",
         "ShippingCost" => "Double",
-        "PaymentFee" => "Double",  // Added PaymentFee field
+        "PaymentFee" => "Double",
         "PaymentMethod" => "Varchar(255)",
         "PaymentStatus" => "Enum('unpaid,paid,failed,refunded', 'unpaid')",
         "ShippingCourier" => "Varchar(255)",
@@ -20,7 +20,7 @@ class Order extends DataObject
         "CreateAt" => "Datetime",
         "UpdateAt" => "Datetime",
         "ExpiresAt" => "Datetime",
-        "StockReduced" => "Boolean(0)", // Flag untuk track apakah stok sudah dikurangi
+        "StockReduced" => "Boolean(0)",
     ];
     private static $has_one = [
         "Member" => Member::class,
@@ -36,7 +36,7 @@ class Order extends DataObject
         "Status" => "Status Order",
         "TotalPrice" => "Total Price",
         "ShippingCost" => "Shipping Cost",
-        "PaymentFee" => "Payment Fee",  // Added to summary fields
+        "PaymentFee" => "Payment Fee",
         "PaymentMethod" => "Payment Method",
         "PaymentStatus" => "Payment Status",
         "ShippingCourier" => "Shipping Courier",
@@ -63,6 +63,75 @@ class Order extends DataObject
         if ($this->Status == 'pending' && !$this->ExpiresAt) {
             $this->ExpiresAt = date('Y-m-d H:i:s', strtotime('+24 hours'));
         }
+    }
+
+    /**
+     * Menghitung total harga asli order (sebelum diskon)
+     */
+    public function getOriginalTotalPrice()
+    {
+        $orderItems = OrderItem::get()->filter('OrderID', $this->ID);
+
+        $originalTotal = 0;
+        foreach ($orderItems as $item) {
+            $originalTotal += $item->getOriginalSubtotal();
+        }
+
+        return $originalTotal;
+    }
+
+    /**
+     * Menghitung total diskon produk untuk order ini
+     */
+    public function getTotalProductDiscount()
+    {
+        $orderItems = OrderItem::get()->filter('OrderID', $this->ID);
+
+        $totalDiscount = 0;
+        foreach ($orderItems as $item) {
+            $totalDiscount += $item->getProductDiscountTotal();
+        }
+
+        return $totalDiscount;
+    }
+
+    /**
+     * Menghitung total diskon FlashSale untuk order ini
+     */
+    public function getTotalFlashSaleDiscount()
+    {
+        $orderItems = OrderItem::get()->filter('OrderID', $this->ID);
+
+        $totalDiscount = 0;
+        foreach ($orderItems as $item) {
+            $totalDiscount += $item->getFlashSaleDiscountTotal();
+        }
+
+        return $totalDiscount;
+    }
+
+    /**
+     * Format harga asli
+     */
+    public function getFormattedOriginalTotalPrice()
+    {
+        return 'Rp ' . number_format($this->getOriginalTotalPrice(), 0, '.', '.');
+    }
+
+    /**
+     * Format total diskon produk
+     */
+    public function getFormattedTotalProductDiscount()
+    {
+        return 'Rp ' . number_format($this->getTotalProductDiscount(), 0, '.', '.');
+    }
+
+    /**
+     * Format total diskon FlashSale
+     */
+    public function getFormattedTotalFlashSaleDiscount()
+    {
+        return 'Rp ' . number_format($this->getTotalFlashSaleDiscount(), 0, '.', '.');
     }
 
     /**
@@ -159,12 +228,12 @@ class Order extends DataObject
             if ($this->PaymentStatus == 'unpaid') {
                 $this->PaymentStatus = 'failed';
             }
-            
+
             // Restore stock if it was already reduced
             if ($this->StockReduced) {
                 $this->restoreStock();
             }
-            
+
             $this->write();
             return true;
         }
@@ -184,7 +253,7 @@ class Order extends DataObject
 
         $this->Status = 'paid';
         $this->PaymentStatus = 'paid';
-        
+
         // Kurangi stok produk jika belum dikurangi
         if (!$this->StockReduced) {
             $stockReduced = $this->reduceStock();
@@ -196,7 +265,7 @@ class Order extends DataObject
                 return false;
             }
         }
-        
+
         $this->write();
         return true;
     }
@@ -207,21 +276,21 @@ class Order extends DataObject
     private function validateStock()
     {
         $orderItems = $this->OrderItem();
-        
+
         foreach ($orderItems as $item) {
             $product = $item->Product();
             if (!$product) {
                 error_log('Order::validateStock - Product not found for OrderItem: ' . $item->ID);
                 return false;
             }
-            
+
             if ($product->Stok < $item->Quantity) {
-                error_log('Order::validateStock - Insufficient stock for product: ' . $product->ID . 
-                         ' (Available: ' . $product->Stok . ', Required: ' . $item->Quantity . ')');
+                error_log('Order::validateStock - Insufficient stock for product: ' . $product->ID .
+                    ' (Available: ' . $product->Stok . ', Required: ' . $item->Quantity . ')');
                 return false;
             }
         }
-        
+
         return true;
     }
 
@@ -232,49 +301,49 @@ class Order extends DataObject
     {
         $orderItems = $this->OrderItem();
         $updatedProducts = [];
-        
+
         try {
             foreach ($orderItems as $item) {
                 $product = $item->Product();
                 if (!$product) {
                     throw new Exception('Product not found for OrderItem: ' . $item->ID);
                 }
-                
+
                 // Validasi stok sekali lagi sebelum pengurangan
                 if ($product->Stok < $item->Quantity) {
-                    throw new Exception('Insufficient stock for product: ' . $product->Name . 
-                                      ' (Available: ' . $product->Stok . ', Required: ' . $item->Quantity . ')');
+                    throw new Exception('Insufficient stock for product: ' . $product->Name .
+                        ' (Available: ' . $product->Stok . ', Required: ' . $item->Quantity . ')');
                 }
-                
+
                 // Kurangi stok
                 $oldStock = $product->Stok;
                 $product->Stok = $product->Stok - $item->Quantity;
                 $product->write();
-                
+
                 $updatedProducts[] = [
                     'product' => $product,
                     'oldStock' => $oldStock,
                     'quantity' => $item->Quantity
                 ];
-                
-                error_log('Order::reduceStock - Product: ' . $product->Name . 
-                         ' stock reduced from ' . $oldStock . ' to ' . $product->Stok);
+
+                error_log('Order::reduceStock - Product: ' . $product->Name .
+                    ' stock reduced from ' . $oldStock . ' to ' . $product->Stok);
             }
-            
+
             return true;
-            
+
         } catch (Exception $e) {
             error_log('Order::reduceStock - Error: ' . $e->getMessage());
-            
+
             // Rollback: kembalikan stok yang sudah dikurangi
             foreach ($updatedProducts as $productData) {
                 $product = $productData['product'];
                 $product->Stok = $productData['oldStock'];
                 $product->write();
-                error_log('Order::reduceStock - Rollback: Product ' . $product->Name . 
-                         ' stock restored to ' . $productData['oldStock']);
+                error_log('Order::reduceStock - Rollback: Product ' . $product->Name .
+                    ' stock restored to ' . $productData['oldStock']);
             }
-            
+
             return false;
         }
     }
@@ -285,19 +354,19 @@ class Order extends DataObject
     private function restoreStock()
     {
         $orderItems = $this->OrderItem();
-        
+
         foreach ($orderItems as $item) {
             $product = $item->Product();
             if ($product) {
                 $oldStock = $product->Stok;
                 $product->Stok = $product->Stok + $item->Quantity;
                 $product->write();
-                
-                error_log('Order::restoreStock - Product: ' . $product->Name . 
-                         ' stock restored from ' . $oldStock . ' to ' . $product->Stok);
+
+                error_log('Order::restoreStock - Product: ' . $product->Name .
+                    ' stock restored from ' . $oldStock . ' to ' . $product->Stok);
             }
         }
-        
+
         $this->StockReduced = false;
     }
 

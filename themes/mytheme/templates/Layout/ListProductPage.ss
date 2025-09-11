@@ -11,9 +11,16 @@
                     <div class="col">
                         <a href="{$Up.Link}/view/{$ID}" class="text-decoration-none" >
                         <div class="card h-100 position-relative" style="flex: 1 1 150px; max-width: 100%">
+                           
                             <% if $hasDiscount %>
                             <span class="badge bg-danger position-absolute" style="top: 5px; left: 5px; z-index: 1; font-size: 0.6rem;">
                                 $DiscountPercentage
+                            </span>
+                            <% end_if %>
+
+                            <% if $hasActiveFlashSale %>
+                            <span class="badge bg-info position-absolute" style="top: 5px; right: 5px; z-index: 1; font-size: 0.6rem;">
+                                FlashSale $FlashSale.DiscountFlashSale%
                             </span>
                             <% end_if %>
                             
@@ -41,18 +48,38 @@
                                     <% end_if %>
                                     <small class="text-muted" style="font-size: 0.6rem">$Stok Tersedia</small>
                                 </div>
-                                <div class="d-flex align-items-center justify-content-between">
-                                    <!-- Display Price -->
-                                    <p class="card-text fw-bold text-primary mb-0" style="font-size: 0.9rem">
-                                    $DisplayPrice
+                                <% if $hasActiveFlashSale %>
+                                <div class="d-flex justify-content-between align-items-start">
+                                    <p class="text-primary fw-bold mb-0" style="font-size: 0.9rem">
+                                        $FlashSalePrice
                                     </p>
-                                    <!-- Original Price (crossed out if discount exists) -->
-                                    <% if $hasDiscount && $OriginalPrice %>
-                                    <small class="text-muted text-decoration-line-through" style="font-size: 0.7rem">
-                                    $OriginalPrice
-                                    </small>
-                                    <% end_if %>
+                                    <div class="text-end">
+                                        <% if $hasDiscount %>
+                                            <small class="text-muted text-decoration-line-through d-block" style="font-size: 0.7rem">
+                                                $DisplayPrice
+                                            </small>
+                                        <% end_if %>
+                                        <small class="text-muted text-decoration-line-through d-block" style="font-size: 0.7rem">
+                                            $OriginalPrice
+                                        </small>
+                                    </div>
                                 </div>
+                                <% else_if $hasDiscount %>
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <p class="text-primary fw-bold mb-0" style="font-size: 0.9rem">
+                                        $DisplayPrice
+                                    </p>
+                                    <small class="text-muted text-decoration-line-through" style="font-size: 0.7rem">
+                                        $OriginalPrice
+                                    </small>
+                                </div>
+                                <% else %>
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <p class="text-primary fw-bold mb-0" style="font-size: 0.9rem">
+                                        $DisplayPrice
+                                    </p>
+                                </div>
+                                <% end_if %>
                                 </div>
                             </div>
                         </div>

@@ -39,11 +39,20 @@
                             </div>
                             <div class="col-6 col-md-2 text-center mt-2 mt-md-0">
                                 <small class="d-md-none">Harga:</small><br />
-                                <% if $Product.hasDiscount %>
-                                    <del class="text-muted">$Product.OriginalPrice</del><br />
+                                <% if $Product.hasActiveFlashSale %>
+                                    <%-- Flash Sale Active: Show original price crossed, discount price crossed (if any), flash sale price --%>
+                                    <del class="text-muted small">$Product.numberFormat</del><br />
+                                    <% if $Product.hasDiscount %>
+                                        <del class="text-muted small">$Product.DisplayPrice</del><br />
+                                    <% end_if %>
+                                    <span class="text-danger fw-bold">$Product.FlashSalePrice</span>
+                                <% else_if $Product.hasDiscount %>
+                                    <%-- Only Regular Discount: Show original price crossed, discount price --%>
+                                    <del class="text-muted small">$Product.numberFormat</del><br />
                                     <span class="text-danger fw-bold">$Product.DisplayPrice</span>
                                 <% else %>
-                                    <span class="text-danger fw-bold">$Product.DisplayPrice</span>
+                                    <%-- No Discount: Show normal price --%>
+                                    <span class="text-dark fw-bold">$Product.numberFormat</span>
                                 <% end_if %>
                             </div>
                             <div class="col-6 col-md-2 text-center mt-2 mt-md-0">

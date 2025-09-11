@@ -26,12 +26,22 @@
                                 ★ 0 <span class="text-muted">(0 Ulasan)</span>
                             <% end_if %>
                         </p>
-                        <% if $Product.hasDiscount %>
-                        <p class="mb-1">
-                            <del class="text-muted">$Product.OriginalPrice</del>
-                        </p>
+                        <% if $Product.hasActiveFlashSale %>
+                            <%-- Flash Sale Active: Show original price crossed, discount price crossed (if any), flash sale price --%>
+                            <del class="text-muted">$Product.numberFormat</del><br />
+                            <% if $Product.hasDiscount %>
+                                <del class="text-muted">$Product.DisplayPrice</del><br />
+                            <% end_if %>
+                            <span class="text-danger fw-bold">$Product.FlashSalePrice</span>
+                            <small class="badge bg-info ms-2">Flash Sale $Product.FlashSale.DiscountFlashSale% OFF</small>
+                        <% else_if $Product.hasDiscount %>
+                            <%-- Only Regular Discount: Show original price crossed, discount price --%>
+                            <del class="text-muted">$Product.numberFormat</del><br />
+                            <span class="text-danger fw-bold">$Product.DisplayPrice</span>
+                        <% else %>
+                            <%-- No Discount: Show normal price --%>
+                            <span class="text-dark fw-bold">$Product.numberFormat</span>
                         <% end_if %>
-                        <p class="mb-0 text-danger fw-bold fs-5">$Product.DisplayPrice</p>
                     </div>
                 </div>
 
