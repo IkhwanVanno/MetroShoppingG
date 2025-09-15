@@ -2,7 +2,79 @@
     <div class="container py-5">
         <div class="row">
             <div class="col-md-8 offset-md-2">
-                <h2>Profil Saya</h2>
+                <div class="d-flex align-items-center justify-content-between">
+                    <h2>Profil Saya</h2>
+                    <% if $MembershipTier %>
+                        <div class="d-flex align-items-center gap-2">
+                            <% if $MembershipTier == 'bronze' %>
+                                <img src="$resourceURL('themes/mytheme/images/bronze.png')" alt="$MembershipTierName" width="32" height="32" />
+                            <% else_if $MembershipTier == 'silver' %>
+                                <img src="$resourceURL('themes/mytheme/images/silver.png')" alt="$MembershipTierName" width="32" height="32" />
+                            <% else_if $MembershipTier == 'gold' %>
+                                <img src="$resourceURL('themes/mytheme/images/gold.png')" alt="$MembershipTierName" width="32" height="32" />
+                            <% end_if %>
+                            <span class="fw-bold">$MembershipTierName</span>
+                        </div>
+                    <% else %>
+                        <span class="text-muted">Member</span>
+                    <% end_if %>
+                </div>
+                
+                <% if $MembershipProgress %>
+                    <div class="card mb-4">
+                        <div class="card-header">
+                            <h5 class="card-title mb-0">Status Keanggotaan</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <p>
+                                        <strong>Total Transaksi:</strong> Rp $MembershipProgress.current_total
+                                    </p>
+                                    <p><strong>Status Saat Ini:</strong> $MembershipTierName</p>
+                                </div>
+                                <div class="col-md-6">
+                                    <% if $MembershipProgress.next_tier %>
+                                    <p>
+                                        <strong>Target Berikutnya:</strong>
+                                        $MembershipProgress.next_tier
+                                    </p>
+                                    <p>
+                                        <strong>Sisa:</strong> Rp $MembershipProgress.remaining_amount
+                                    </p>
+
+                                    <!-- Progress Bar -->
+                                    <div class="progress mb-2" style="height: 20px">
+                                        <div
+                                            class="progress-bar"
+                                            role="progressbar"
+                                            style="width: $MembershipProgress.progress_percentage;"
+                                            aria-valuenow="$MembershipProgress.progress_percentage"
+                                            aria-valuemin="0"
+                                            aria-valuemax="100"
+                                        >
+                                            $MembershipProgress.progress_percentage
+                                        </div>
+                                    </div>
+                                    <% else %>
+                                    <div class="text-center">
+                                        <img
+                                            src="$resourceURL('themes/mytheme/images/gold.png')"
+                                            alt="Gold Member"
+                                            width="48"
+                                            height="48"
+                                            class="mb-2"
+                                        />
+                                        <p class="text-success fw-bold">
+                                            Selamat! Anda telah mencapai tingkat tertinggi!
+                                        </p>
+                                    </div>
+                                    <% end_if %>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                <% end_if %>
                 
                 <% if $UpdateSuccess %>
                     <div class="alert alert-success alert-dismissible fade show" role="alert">

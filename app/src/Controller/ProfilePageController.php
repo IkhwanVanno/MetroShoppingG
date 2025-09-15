@@ -4,6 +4,7 @@ use SilverStripe\Control\HTTPRequest;
 use SilverStripe\Security\Member;
 use SilverStripe\ORM\ValidationResult;
 use SilverStripe\Security\MemberAuthenticator\MemberAuthenticator;
+use SilverStripe\View\ArrayData;
 
 class ProfilePageController extends PageController
 {
@@ -38,8 +39,16 @@ class ProfilePageController extends PageController
         $user = $this->getCurrentUser();
         $member = Member::get()->byID($user->ID);
 
+        // Get membership information
+        $membershipProgress = null;
+        if ($user) {
+            $progressData = MembershipService::getProgressToNextTier($user->ID);
+            $membershipProgress = ArrayData::create($progressData);
+        }
+
         $data = array_merge($this->getCommonData(), [
             "Member" => $member,
+            "MembershipProgress" => $membershipProgress,
             "UpdateSuccess" => $this->getRequest()->getSession()->get('ProfileUpdateSuccess'),
             "UpdateErrors" => $this->getRequest()->getSession()->get('ProfileUpdateErrors'),
         ]);
