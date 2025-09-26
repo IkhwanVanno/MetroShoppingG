@@ -92,7 +92,6 @@ class PaymentController extends PageController
      */
     public function callback(HTTPRequest $request)
     {
-        // Allow both POST and GET requests for ngrok compatibility
         if (!$request->isPOST() && !$request->isGET()) {
             return $this->httpError(405, 'Method not allowed');
         }

@@ -55,9 +55,6 @@ DUITKU_API_KEY=""
 DUITKU_GETPAYMENTMETHOD_URL=""
 DUITKU_BASE_URL=""
 
-# Ngrok
-NGROK_URL=https://ngrok_url/MetroShoppingG
-
 # Mixed Content Fix
 SS_TRUSTED_PROXY_IPS="*"
 SS_TRUSTED_PROXY_PROTOCOL_HEADER="X-Forwarded-Proto"
@@ -105,13 +102,13 @@ Password: password
 
 ## 🌐 Ngrok (Testing URL Publik)
 
-Jika kamu ingin mengakses project dari luar atau untuk webhook, jalankan:
+Jika kamu ingin mengakses project dari luar atau untuk webhook dan untuk callback payment, jalankan:
 
 ```bash
 ngrok http 80
 ```
 
-Ganti `SS_BASE_URL` dan `NGROK_URL` di `.env` dengan URL yang dihasilkan Ngrok.
+Ganti `SS_BASE_URL` di `.env` dengan URL yang dihasilkan Ngrok.
 
 ---
 

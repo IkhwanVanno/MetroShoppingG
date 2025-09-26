@@ -12,6 +12,7 @@ use SilverStripe\Security\IdentityStore;
 use SilverStripe\Security\Member;
 use SilverStripe\Security\MemberAuthenticator\LoginHandler;
 use SilverStripe\Security\MemberAuthenticator\MemberAuthenticator;
+use SilverStripe\Security\Security;
 use SilverStripe\SiteConfig\SiteConfig;
 use SilverStripe\View\ArrayData;
 
@@ -19,6 +20,7 @@ class AuthPageController extends PageController
 {
     private static $allowed_actions = [
         'login',
+        'logout',
         'register',
         'forgotPassword',
         'resetPassword',
@@ -27,6 +29,7 @@ class AuthPageController extends PageController
 
     private static $url_handlers = [
         'login' => 'login',
+        'logout' => 'logout',
         'register' => 'register',
         'forgot-password' => 'forgotPassword',
         'reset-password' => 'resetPassword'
@@ -34,13 +37,19 @@ class AuthPageController extends PageController
 
     public function login(HTTPRequest $request)
     {
+        $flash = $request->getSession()->get('FlashMessage');
+        if ($flash) {
+            $this->flashMessages = ArrayData::create($flash);
+            $request->getSession()->clear('FlashMessage');
+        }
+
         $validationResult = null;
 
         if ($request->isPOST()) {
             $validationResult = $this->processLogin($request);
 
             if ($validationResult->isValid()) {
-                $this->getRequest()->getSession()->set('FlashMessage', [
+                $request->getSession()->set('FlashMessage', [
                     'Message' => 'Masuk berhasil! Selamat datang.',
                     'Type' => 'primary'
                 ]);
@@ -57,10 +66,22 @@ class AuthPageController extends PageController
 
         $data = array_merge($this->getCommonData(), [
             'Title' => 'Login',
-            'ValidationResult' => $validationResult
+            'ValidationResult' => $validationResult,
+            'FlashMessages' => $this->flashMessages ?? null
         ]);
 
         return $this->customise($data)->renderWith(['LoginPage', 'Page']);
+    }
+
+    public function logout(HTTPRequest $request)
+    {
+        Injector::inst()->get(IdentityStore::class)->logOut($request);
+        $request->getSession()->set('FlashMessage', [
+            'Message' => 'Anda berhasil logout.',
+            'Type' => 'info'
+        ]);
+
+        return $this->redirect(Director::absoluteBaseURL() . '/auth/login');
     }
 
     public function register(HTTPRequest $request)
@@ -206,8 +227,6 @@ class AuthPageController extends PageController
     private function processRegister(HTTPRequest $request)
     {
         $baseURL = Environment::getEnv('SS_BASE_URL');
-        $ngrokUrl = Environment::getEnv('NGROK_URL');
-
         $firstName = $request->postVar('register_first_name');
         $lastName = $request->postVar('register_last_name');
         $userEmail = $request->postVar('register_email');
@@ -240,7 +259,7 @@ class AuthPageController extends PageController
         $member->addToGroupByCode('site-users');
         $member->changePassword($password1);
 
-        $verifyLink = rtrim($ngrokUrl, '/') . '/verify?token=' . $member->VerificationToken;
+        $verifyLink = rtrim($baseURL) . '/verify?token=' . $member->VerificationToken;
 
         $emailObj = \SilverStripe\Control\Email\Email::create()
             ->setTo($userEmail)
@@ -288,12 +307,11 @@ class AuthPageController extends PageController
 
         // Send reset email
         $baseURL = Environment::getEnv('SS_BASE_URL');
-        $ngrokUrl = Environment::getEnv('NGROK_URL');
         $SiteConfig = SiteConfig::current_site_config();
         $emails = explode(',', $SiteConfig->Email);
         $CompanyEmail = trim($emails[0]);
 
-        $resetLink = rtrim($ngrokUrl, '/') . '/auth/reset-password?token=' . $resetToken;
+        $resetLink = rtrim($baseURL) . '/auth/reset-password?token=' . $resetToken;
 
         $emailObj = \SilverStripe\Control\Email\Email::create()
             ->setTo($email)

@@ -15,11 +15,9 @@ class DuitkuService
         $this->merchantCode = Environment::getEnv('DUITKU_MERCHANT_CODE');
         $this->apiKey = Environment::getEnv('DUITKU_API_KEY');
         $this->baseUrl = Environment::getEnv('DUITKU_BASE_URL');
-
-        // Use ngrok URL for callback and return
-        $ngrokUrl = Environment::getEnv('NGROK_URL') ?: 'https://1683d345346d.ngrok-free.app';
-        $this->callbackUrl = $ngrokUrl . '/payment/callback';
-        $this->returnUrl = $ngrokUrl . '/payment/return';
+        $baseURL = Environment::getEnv('SS_BASE_URL');
+        $this->callbackUrl = $baseURL . '/payment/callback';
+        $this->returnUrl = $baseURL . '/payment/return';
 
         error_log('DuitkuService - Callback URL: ' . $this->callbackUrl);
         error_log('DuitkuService - Return URL: ' . $this->returnUrl);

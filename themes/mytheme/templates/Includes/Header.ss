@@ -129,7 +129,7 @@
 				<li><a class="dropdown-item" href="$BaseHref/profile">Profil</a></li>
 				<li><a class="dropdown-item" href="$BaseHref/order">Pesanan</a></li>
 				<li><hr class="dropdown-divider"></li>
-				<li><a class="dropdown-item" href="$BaseHref/Security/logout">Keluar</a></li>
+				<li><a class="dropdown-item" href="$BaseHref/auth/logout">Keluar</a></li>
 			<% else %>
 				<!-- Jika belum login -->
 				<li><a class="dropdown-item" href="$BaseHref/auth/login">Masuk</a></li>
