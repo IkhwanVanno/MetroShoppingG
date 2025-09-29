@@ -67,21 +67,6 @@
 
 		<!-- Icons -->
 		<div class="col-12 col-md-3 d-flex align-items-center justify-content-center justify-content-md-end gap-3 mt-2 mt-md-0">
-		<!-- Membership Badge -->
-		<% if $MembershipTier %>
-			<div class="d-flex align-items-center gap-2">
-				<% if $MembershipTier == 'bronze' %>
-					<img src="$resourceURL('themes/mytheme/images/bronze.png')" alt="$MembershipTierName" width="32" height="32" />
-				<% else_if $MembershipTier == 'silver' %>
-					<img src="$resourceURL('themes/mytheme/images/silver.png')" alt="$MembershipTierName" width="32" height="32" />
-				<% else_if $MembershipTier == 'gold' %>
-					<img src="$resourceURL('themes/mytheme/images/gold.png')" alt="$MembershipTierName" width="32" height="32" />
-				<% end_if %>
-				<span class="fw-bold">$MembershipTierName</span>
-			</div>
-		<% else %>
-			<span class="text-muted">Member</span>
-		<% end_if %>
 
 		<!-- Cart Link -->
 		<% if $IsLoggedIn %>
