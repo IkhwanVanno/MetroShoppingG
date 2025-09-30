@@ -77,7 +77,7 @@
 
 	<!-- Kolom Kanan: Formulir -->
 	<div class="col-lg-6">
-		<h5 class="mb-3 text-center text-lg-start">Hubungi Kami</h5>
+		<h5 class="mb-3 text-center text-lg-center">Hubungi Kami</h5>
 		$ContactForm
 	</div>
 	</div>
@@ -127,7 +127,11 @@
 		<h5 class="fw-bold">Ikuti Kami</h5>
 		<ul class="list-unstyled">
 		<% loop SocialMedia %>
-			<li>$Name</li>	
+		<li>
+			<a href="$Link" style="text-decoration: none; color: inherit;">
+				$Name
+			</a>
+		</li>
 		<% end_loop %>
 		</ul>
 	</div>

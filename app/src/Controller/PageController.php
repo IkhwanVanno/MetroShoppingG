@@ -74,7 +74,7 @@ namespace {
 
             $products = Product::get();
 
-            $flashsale = FlashSale::get();
+            $flashsale = FlashSale::get()->filter('Status', 'active');
 
             $verticalCategoryFilter = $request->getVar('vertical_category');
             $verticalFilteredProducts = $this->getFilteredProducts($verticalCategoryFilter);
@@ -155,7 +155,7 @@ namespace {
             return 0;
         }
 
-         public function getMembershipTier()
+        public function getMembershipTier()
         {
             if ($this->isLoggedIn()) {
                 $user = $this->getCurrentUser();
@@ -210,31 +210,41 @@ namespace {
         // Contact form methods
         public function ContactForm()
         {
-            $nameField = TextField::create('UserName', 'Your Name')
-                ->addExtraClass('form-control')
+            $nameField = TextField::create('UserName', 'Your Name :')
+                ->addExtraClass('form-field')
                 ->setAttribute('placeholder', 'Enter your name')
-                ->setAttribute('required', true);
+                ->setAttribute('required', true)
+                ->setAttribute('style', 'width:100%; padding:8px; margin-bottom:12px;');
 
-            $emailField = EmailField::create('UserEmail', 'Your Email')
-                ->addExtraClass('form-control')
+            $emailField = EmailField::create('UserEmail', 'Your Email :')
+                ->addExtraClass('form-field')
                 ->setAttribute('placeholder', 'Enter your email')
-                ->setAttribute('required', true);
+                ->setAttribute('required', true)
+                ->setAttribute('style', 'width:100%; padding:8px; margin-bottom:12px;');
 
-            $messageField = TextareaField::create('Message', 'Message')
-                ->addExtraClass('form-control mb-3')
+            $messageField = TextareaField::create('Message', 'Message :')
+                ->addExtraClass('form-field')
                 ->setAttribute('rows', 4)
                 ->setAttribute('placeholder', 'Write your message here')
-                ->setAttribute('required', true);
+                ->setAttribute('required', true)
+                ->setAttribute('style', 'width:100%; padding:8px; margin-bottom:12px;');
 
             $fields = FieldList::create($nameField, $emailField, $messageField);
+
             $actions = FieldList::create(
                 FormAction::create('handleContactSubmit', 'SEND MESSAGE')
-                    ->addExtraClass('btn btn-dark w-100')
+                    ->addExtraClass('form-button')
+                    ->setAttribute('style', 'width:100%; padding:10px; background:#333; color:white; border:none; cursor:pointer;')
             );
 
             $validator = RequiredFields::create('UserName', 'UserEmail', 'Message');
+
             $form = Form::create($this, 'ContactForm', $fields, $actions, $validator);
+
+            // Tambahkan border dan padding ke seluruh form
             $form->addExtraClass('custom-contact-form');
+            $form->setAttribute('style', 'border:1px solid #ccc; padding:20px; max-width:500px; margin:auto;');
+
             $form->enableSecurityToken();
 
             return $form;
