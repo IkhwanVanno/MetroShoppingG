@@ -409,6 +409,10 @@ class Order extends DataObject
             $this->write();
             return true;
         }
+        // Update membership tier member setelah order completed
+        if ($this->MemberID) {
+            MembershipService::onOrderCompleted($this->ID);
+        }
         return false;
     }
 

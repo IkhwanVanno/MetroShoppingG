@@ -11,31 +11,48 @@ class MemberExtension extends DataExtension
         'IsVerified' => 'Boolean',
         'ResetPasswordToken' => 'Varchar(255)',
         'ResetPasswordExpiry' => 'Datetime',
+        'MembershipTier' => "Enum('bronze,silver,gold', '')",
+        'TotalTransactions' => 'Double',
+        'LastMembershipUpdate' => 'Datetime',
+        'MembershipPeriodStart' => 'Datetime',
     ];
-    
+
     /**
-     * Get membership tier for this member
+     * Update summary fields untuk admin
      */
-    public function getMembershipTier()
+    public function updateSummaryFields(&$fields)
     {
-        return MembershipService::getMembershipTier($this->owner->ID);
+        $fields['MembershipTier'] = 'Membership Tier';
+        $fields['FormattedTotalTransactions'] = 'Total Transaksi';
+        $fields['MembershipPeriodStart'] = 'Periode Mulai';
+        $fields['LastMembershipUpdate'] = 'Terakhir Update';
     }
 
     /**
-     * Get membership tier name for this member
+     * Format total transaksi
+     */
+    public function getFormattedTotalTransactions()
+    {
+        return 'Rp ' . number_format($this->owner->TotalTransactions, 0, '.', '.');
+    }
+
+    /**
+     * Mendapatkan nama tier yang user-friendly
      */
     public function getMembershipTierName()
     {
-        $tier = $this->getMembershipTier();
-        return MembershipService::getMembershipTierName($tier);
+        return MembershipService::getMembershipTierName($this->owner->MembershipTier);
     }
 
     /**
-     * Get progress to next tier
+     * Set default values saat member baru dibuat
      */
-    public function getMembershipProgress()
+    public function onBeforeWrite()
     {
-        $progress = MembershipService::getProgressToNextTier($this->owner->ID);
-        return ArrayData::create($progress);
+        parent::onBeforeWrite();
+
+        if (!$this->owner->MembershipPeriodStart) {
+            $this->owner->MembershipPeriodStart = date('Y-m-d H:i:s');
+        }
     }
 }

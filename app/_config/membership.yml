@@ -1,0 +1,6 @@
+---
+Name: membership-config
+---
+SilverStripe\Dev\BuildTask:
+  registered_tasks:
+    App\Tasks\MembershipResetTask: true

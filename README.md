@@ -72,6 +72,7 @@ composer install
 composer update
 composer vendor-expose
 composer require dompdf/dompdf
+composer dump-autoload
 ```
 
 ---
