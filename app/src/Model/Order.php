@@ -407,13 +407,13 @@ class Order extends DataObject
         if ($this->Status == 'shipped') {
             $this->Status = 'completed';
             $this->write();
-            return true;
+        } elseif ($this->Status != 'completed') {
+            return false;
         }
-        // Update membership tier member setelah order completed
         if ($this->MemberID) {
             MembershipService::onOrderCompleted($this->ID);
         }
-        return false;
+        return true;
     }
 
     /**
