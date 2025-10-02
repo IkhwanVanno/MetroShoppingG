@@ -114,12 +114,6 @@
                         <h5 class="mb-3">Ubah Sandi (Opsional)</h5>
                         
                         <div class="mb-3">
-                            <label for="current_password" class="form-label">Sandi Saat Ini</label>
-                            <input type="password" class="form-control" id="current_password" name="current_password">
-                            <small class="form-text text-muted">Diperlukan jika ingin mengubah Sandi</small>
-                        </div>
-                        
-                        <div class="mb-3">
                             <label for="new_password" class="form-label">Sandi Baru</label>
                             <input type="password" class="form-control" id="new_password" name="new_password">
                             <small class="form-text text-muted">Minimal 8 karakter</small>

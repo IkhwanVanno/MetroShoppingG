@@ -102,12 +102,7 @@ class ProfilePageController extends PageController
             }
         }
 
-        if ($newPassword || $confirmPassword || $currentPassword) {
-            if (!$currentPassword) {
-                $result->addError('Password saat ini diperlukan untuk mengubah password.');
-                return $result;
-            }
-
+        if ($newPassword || $confirmPassword) {
             if (!$newPassword) {
                 $result->addError('Password baru tidak boleh kosong.');
                 return $result;
@@ -133,14 +128,6 @@ class ProfilePageController extends PageController
                 'Email' => $member->Email,
                 'Password' => $currentPassword
             ];
-
-            $tempResult = ValidationResult::create();
-            $authenticatedMember = $authenticator->authenticate($loginData, $request, $tempResult);
-
-            if (!$authenticatedMember || $authenticatedMember->ID !== $member->ID) {
-                $result->addError('Password saat ini salah.');
-                return $result;
-            }
         }
 
         try {
