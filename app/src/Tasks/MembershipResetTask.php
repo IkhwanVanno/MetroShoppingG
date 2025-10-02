@@ -1,11 +1,6 @@
 <?php
 
-
-namespace App\Tasks;
-
 use SilverStripe\Dev\BuildTask;
-use SilverStripe\Security\Member;
-use MembershipService;
 
 /**
  * Task untuk reset membership yang sudah expired (lewat 1 bulan)

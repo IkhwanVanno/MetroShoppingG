@@ -1,3 +1,4 @@
+<% include PopupAdvertisement %>
 <main class="container py-5">
 	<!-- section carausel -->
 	<section class="container-fluid px-0">

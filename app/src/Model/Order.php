@@ -46,6 +46,7 @@ class Order extends DataObject
         "ExpiresAt" => "Expires At",
         "ShippingAddress.Address" => "Address",
     ];
+    private static $default_sort = 'OrderCode DESC';
 
     /**
      * Set default values and expiry time

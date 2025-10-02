@@ -15,14 +15,15 @@ class MemberExtension extends DataExtension
         'MembershipTier' => 'Int',
         'MembershipTierName' => 'Varchar(100)',
         'MembershipPeriodStart' => 'Datetime',
-        'LastMembershipUpdate' => 'Datetime'
+        'LastMembershipUpdate' => 'Datetime',
+        'PopupViewCount' => 'Int',
+        'LastPopupDate' => 'Date'
     ];
 
-    /**
-     * Update summary fields untuk admin
-     */
     public function updateSummaryFields(&$fields)
     {
+        $fields['PopupViewCount'] = 'Pop-Up Showcount';
+        $fields['LastPopupDate'] = 'Terakhir PopUp Update';
         $fields['MembershipTierName'] = 'Membership Tier';
         $fields['FormattedTotalTransactions'] = 'Total Transaksi';
         $fields['MembershipPeriodStart'] = 'Periode Mulai';

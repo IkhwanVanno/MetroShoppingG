@@ -23,6 +23,7 @@ namespace {
         private static $allowed_actions = [
             "Index",
             "ContactForm",
+            "incrementPopupView",
         ];
 
         protected $flashMessages = null;
@@ -57,7 +58,10 @@ namespace {
                 "FavoriteCount" => $this->getFavoriteCount(),
                 "MembershipTier" => $this->getMembershipTier(),
                 "MembershipTierName" => $this->getMembershipTierName(),
-                "MembershipProgress" => $this->getMembershipProgress()
+                "MembershipProgress" => $this->getMembershipProgress(),
+                "ShouldShowPopup" => $this->shouldShowPopup(),
+                "ActivePopups" => $this->getActivePopups(),
+                "ActivePopup" => $this->getActivePopup()
             ];
         }
 
@@ -329,6 +333,64 @@ namespace {
         public function getContactForm()
         {
             return $this->ContactForm();
+        }
+
+        // Pop Up Advertisement
+        public function shouldShowPopup()
+        {
+            $activePopups = PopupAd::get()->filter('Active', 1);
+
+            if (!$activePopups || $activePopups->count() == 0) {
+                return false;
+            }
+
+            if (!$this->isLoggedIn()) {
+                return true;
+            }
+
+            $user = $this->getCurrentUser();
+            $today = date('Y-m-d');
+
+            if ($user->LastPopupDate != $today) {
+                $user->PopupViewCount = 0;
+                $user->LastPopupDate = $today;
+                $user->write();
+            }
+
+            return $user->PopupViewCount < 3;
+        }
+
+        public function getActivePopups()
+        {
+            return PopupAd::get()->filter('Active', 1)->sort('ID', 'ASC');
+        }
+
+        public function getActivePopup()
+        {
+            return PopupAd::get()->filter('Active', 1)->first();
+        }
+
+        public function incrementPopupView(HTTPRequest $request)
+        {
+            if (!$this->isLoggedIn()) {
+                return json_encode(['success' => true, 'message' => 'Guest user']);
+            }
+
+            $user = $this->getCurrentUser();
+            $today = date('Y-m-d');
+
+            if ($user->LastPopupDate != $today) {
+                $user->PopupViewCount = 0;
+                $user->LastPopupDate = $today;
+            }
+
+            $user->PopupViewCount = (int) $user->PopupViewCount + 1;
+            $user->write();
+
+            return json_encode([
+                'success' => true,
+                'count' => $user->PopupViewCount
+            ]);
         }
     }
 }
