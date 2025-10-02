@@ -345,6 +345,14 @@ namespace {
             }
 
             if (!$this->isLoggedIn()) {
+                $cookie = $this->getRequest()->getSession()->get('GuestPopupData');
+                if ($cookie) {
+                    $data = json_decode($cookie, true);
+                    $today = date('Y-m-d');
+                    if (isset($data['date']) && $data['date'] == $today && isset($data['count'])) {
+                        return $data['count'] < 3;
+                    }
+                }
                 return true;
             }
 
@@ -372,8 +380,21 @@ namespace {
 
         public function incrementPopupView(HTTPRequest $request)
         {
+            $today = date('Y-m-d');
             if (!$this->isLoggedIn()) {
-                return json_encode(['success' => true, 'message' => 'Guest user']);
+                $session = $this->getRequest()->getSession();
+                $cookie = $session->get('GuestPopupData');
+                $data = ['date' => $today, 'count' => 1];
+                if ($cookie) {
+                    $data = json_decode($cookie, true);
+                    if ($data['date'] == $today) {
+                        $data['count'] = (int) $data['count'] + 1;
+                    } else {
+                        $data = ['date' => $today, 'count' => 1];
+                    }
+                }
+                $session->set('GuestPopupData', json_encode($data));
+                return json_encode(['success' => true, 'count' => $data['count'], 'message' => 'guest']);
             }
 
             $user = $this->getCurrentUser();

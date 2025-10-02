@@ -53,8 +53,7 @@ document.addEventListener('DOMContentLoaded', function() {
 				// Event ketika modal ditampilkan (untuk increment counter)
 				if (!popupShown) {
 					modalElement.addEventListener('shown.bs.modal', function () {
-						// Kirim request untuk increment counter hanya sekali (untuk semua popup)
-						<% if $IsLoggedIn %>
+						// Kirim request untuk increment counter
 						fetch('$BaseHref/home/incrementPopupView', {
 							method: 'POST',
 							headers: {
@@ -66,7 +65,6 @@ document.addEventListener('DOMContentLoaded', function() {
 						}).catch(error => {
 							console.error('Error counting popup view:', error);
 						});
-						<% end_if %>
 					}, { once: true });
 					popupShown = true;
 				}
