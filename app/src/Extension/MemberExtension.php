@@ -11,10 +11,11 @@ class MemberExtension extends DataExtension
         'IsVerified' => 'Boolean',
         'ResetPasswordToken' => 'Varchar(255)',
         'ResetPasswordExpiry' => 'Datetime',
-        'MembershipTier' => "Enum('bronze,silver,gold', '')",
         'TotalTransactions' => 'Double',
-        'LastMembershipUpdate' => 'Datetime',
+        'MembershipTier' => 'Int',
+        'MembershipTierName' => 'Varchar(100)',
         'MembershipPeriodStart' => 'Datetime',
+        'LastMembershipUpdate' => 'Datetime'
     ];
 
     /**
@@ -22,7 +23,7 @@ class MemberExtension extends DataExtension
      */
     public function updateSummaryFields(&$fields)
     {
-        $fields['MembershipTier'] = 'Membership Tier';
+        $fields['MembershipTierName'] = 'Membership Tier';
         $fields['FormattedTotalTransactions'] = 'Total Transaksi';
         $fields['MembershipPeriodStart'] = 'Periode Mulai';
         $fields['LastMembershipUpdate'] = 'Terakhir Update';

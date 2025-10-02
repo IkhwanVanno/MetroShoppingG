@@ -39,26 +39,24 @@ class ProfilePageController extends PageController
         $user = $this->getCurrentUser();
         $member = Member::get()->byID($user->ID);
 
-        // Get membership information - sekarang dari database (cached)
+        // Get membership information
         $membershipProgress = null;
         $membershipTier = null;
-        $membershipTierName = null;
+        $membershipTierObject = null;
 
         if ($user) {
-            // Ini akan otomatis update jika perlu dan return data dari database
             $progressData = MembershipService::getProgressToNextTier($user->ID);
             $membershipProgress = $progressData ? ArrayData::create($progressData) : null;
 
-            // Get tier dari database
             $membershipTier = MembershipService::getMembershipTier($user->ID);
-            $membershipTierName = MembershipService::getMembershipTierName($membershipTier);
+            $membershipTierObject = MembershipService::getMembershipTierObject($membershipTier);
         }
 
         $data = array_merge($this->getCommonData(), [
             "Member" => $member,
             "MembershipProgress" => $membershipProgress,
             "MembershipTier" => $membershipTier,
-            "MembershipTierName" => $membershipTierName,
+            "MembershipTierObject" => $membershipTierObject,
             "UpdateSuccess" => $this->getRequest()->getSession()->get('ProfileUpdateSuccess'),
             "UpdateErrors" => $this->getRequest()->getSession()->get('ProfileUpdateErrors'),
         ]);
