@@ -26,6 +26,8 @@ class PaymentTransaction extends DataObject
         "CreateAt" => "Create At",
     ];
 
+    private static $default_sort = 'CreateAt DESC';
+
     /** 
      * set default values
      */

@@ -11,6 +11,7 @@ class MemberExtension extends DataExtension
         'IsVerified' => 'Boolean',
         'ResetPasswordToken' => 'Varchar(255)',
         'ResetPasswordExpiry' => 'Datetime',
+        'GoogleID' => 'Varchar(255)',
         'TotalTransactions' => 'Double',
         'MembershipTier' => 'Int',
         'MembershipTierName' => 'Varchar(100)',
@@ -20,8 +21,16 @@ class MemberExtension extends DataExtension
         'LastPopupDate' => 'Date'
     ];
 
+    private static $indexes = [
+        'GoogleID' => true,
+        'VerificationToken' => true,
+        'ResetPasswordToken' => true
+    ];
+
     public function updateSummaryFields(&$fields)
     {
+        $fields['GoogleID'] = 'GoogleID';
+        $fields['IsVerified'] = 'Terverifikasi';
         $fields['PopupViewCount'] = 'Pop-Up Showcount';
         $fields['LastPopupDate'] = 'Terakhir PopUp Update';
         $fields['MembershipTierName'] = 'Membership Tier';
