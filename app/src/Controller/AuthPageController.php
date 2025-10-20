@@ -40,6 +40,14 @@ class AuthPageController extends PageController
         'google-callback' => 'googleCallback'
     ];
 
+    private $AuthService;
+
+    protected function init()
+    {
+        parent::init();
+        $this->AuthService = new AuthServices();
+    }
+
     // Google Auth
     private function getGoogleConfig()
     {
@@ -83,13 +91,13 @@ class AuthPageController extends PageController
 
         try {
             $config = $this->getGoogleConfig();
-            $tokenData = $this->getGoogleAccessToken($code, $config);
+            $tokenData = $this->AuthService->getGoogleAccessToken($code, $config);
 
             if (!isset($tokenData['access_token'])) {
                 throw new \Exception('Failed to get access token');
             }
 
-            $userInfo = $this->getGoogleUserInfo($tokenData['access_token'], $config);
+            $userInfo = $this->AuthService->getGoogleUserInfo($tokenData['access_token'], $config);
 
             if (!isset($userInfo['email'])) {
                 throw new \Exception('Failed to get user email');
@@ -142,52 +150,6 @@ class AuthPageController extends PageController
             return $this->redirect(Director::absoluteBaseURL() . '/auth/login');
         }
     }
-    private function getGoogleAccessToken($code, $config)
-    {
-        $postData = [
-            'code' => $code,
-            'client_id' => $config['client_id'],
-            'client_secret' => $config['client_secret'],
-            'redirect_uri' => $config['redirect_uri'],
-            'grant_type' => 'authorization_code'
-        ];
-
-        $ch = curl_init($config['token_url']);
-        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-        curl_setopt($ch, CURLOPT_POST, true);
-        curl_setopt($ch, CURLOPT_POSTFIELDS, http_build_query($postData));
-        curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false); // For local development
-
-        $response = curl_exec($ch);
-        $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
-        curl_close($ch);
-
-        if ($httpCode !== 200) {
-            throw new \Exception('Failed to exchange code for token. HTTP Code: ' . $httpCode);
-        }
-
-        return json_decode($response, true);
-    }
-
-    private function getGoogleUserInfo($accessToken, $config)
-    {
-        $ch = curl_init($config['userinfo_url']);
-        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-        curl_setopt($ch, CURLOPT_HTTPHEADER, [
-            'Authorization: Bearer ' . $accessToken
-        ]);
-        curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false); // For local development
-
-        $response = curl_exec($ch);
-        $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
-        curl_close($ch);
-
-        if ($httpCode !== 200) {
-            throw new \Exception('Failed to get user info. HTTP Code: ' . $httpCode);
-        }
-
-        return json_decode($response, true);
-    }
 
     // Manual Auth
     public function login(HTTPRequest $request)
@@ -201,7 +163,7 @@ class AuthPageController extends PageController
         $validationResult = null;
 
         if ($request->isPOST()) {
-            $validationResult = $this->processLogin($request);
+            $validationResult = $this->AuthService->processLogin($request);
 
             if ($validationResult->isValid()) {
                 $request->getSession()->set('FlashMessage', [
@@ -244,7 +206,7 @@ class AuthPageController extends PageController
         $validationResult = null;
 
         if ($request->isPOST()) {
-            $validationResult = $this->processRegister($request);
+            $validationResult = $this->AuthService->processRegister($request);
 
             if ($validationResult->isValid()) {
                 $this->getRequest()->getSession()->set('FlashMessage', [
@@ -275,7 +237,7 @@ class AuthPageController extends PageController
         $validationResult = null;
 
         if ($request->isPOST()) {
-            $validationResult = $this->processForgotPassword($request);
+            $validationResult = $this->AuthService->processForgotPassword($request);
 
             if ($validationResult->isValid()) {
                 $this->flashMessages = ArrayData::create([
@@ -319,7 +281,7 @@ class AuthPageController extends PageController
         }
 
         if ($request->isPOST()) {
-            $validationResult = $this->processResetPassword($request, $member);
+            $validationResult = $this->AuthService->processResetPassword($request, $member);
 
             if ($validationResult->isValid()) {
                 $this->getRequest()->getSession()->set('FlashMessage', [
@@ -344,186 +306,5 @@ class AuthPageController extends PageController
         ]);
 
         return $this->customise($data)->renderWith(['ResetPasswordPage', 'Page']);
-    }
-
-    private function processLogin(HTTPRequest $request)
-    {
-        $email = $request->postVar('login_email');
-        $password = $request->postVar('login_password');
-        $rememberMe = $request->postVar('login_remember');
-
-        $data = [
-            'Email' => $email,
-            'Password' => $password,
-            'Remember' => $rememberMe
-        ];
-
-        $result = ValidationResult::create();
-        $authenticator = new MemberAuthenticator();
-        $loginHandler = new LoginHandler('auth', $authenticator);
-
-        if ($member = $loginHandler->checkLogin($data, $request, $result)) {
-            if (!$member->IsVerified) {
-                $result->addError('Akun Anda belum diverifikasi. Silakan cek email.');
-                return $result;
-            }
-
-            if (!$member->inGroup('site-users')) {
-                Injector::inst()->get(IdentityStore::class)->logOut($request);
-                $result->addError('Invalid credentials.');
-            } else {
-                $loginHandler->performLogin($member, $data, $request);
-            }
-        }
-
-        return $result;
-    }
-
-    private function processRegister(HTTPRequest $request)
-    {
-        $baseURL = Environment::getEnv('SS_BASE_URL');
-        $firstName = $request->postVar('register_first_name');
-        $lastName = $request->postVar('register_last_name');
-        $userEmail = $request->postVar('register_email');
-        $password1 = $request->postVar('register_password_1');
-        $password2 = $request->postVar('register_password_2');
-
-        $SiteConfig = SiteConfig::current_site_config();
-        $emails = explode(',', $SiteConfig->Email);
-        $CompanyEmail = trim($emails[0]);
-
-        $result = ValidationResult::create();
-
-        if ($password1 !== $password2) {
-            $result->addError('Passwords do not match.');
-            return $result;
-        }
-
-        if (Member::get()->filter('Email', $userEmail)->exists()) {
-            $result->addError('Email already exists.');
-            return $result;
-        }
-
-        $member = Member::create();
-        $member->FirstName = $firstName;
-        $member->Surname = $lastName;
-        $member->Email = $userEmail;
-        $member->VerificationToken = sha1(uniqid());
-        $member->IsVerified = false;
-        $member->write();
-        $member->addToGroupByCode('site-users');
-        $member->changePassword($password1);
-
-        $verifyLink = rtrim($baseURL) . '/verify?token=' . $member->VerificationToken;
-
-        $emailObj = \SilverStripe\Control\Email\Email::create()
-            ->setTo($userEmail)
-            ->setFrom($CompanyEmail)
-            ->setSubject('Verifikasi Email Anda')
-            ->setHTMLTemplate('CustomEmail')
-            ->setData([
-                'Name' => $firstName,
-                'SenderEmail' => $userEmail,
-                'MessageContent' => "
-                    Terima kasih telah mendaftar. Silakan salin link di bawah untuk memverifikasi akun Anda.
-                    {$verifyLink}",
-                'SiteName' => $SiteConfig->Title,
-            ]);
-
-        $emailObj->send();
-
-        $result->addMessage('Registrasi berhasil! Silakan cek email untuk verifikasi akun.');
-
-        return $result;
-    }
-
-    private function processForgotPassword(HTTPRequest $request)
-    {
-        $email = $request->postVar('forgot_email');
-        $result = ValidationResult::create();
-
-        if (!$email) {
-            $result->addError('Email harus diisi.');
-            return $result;
-        }
-
-        $member = Member::get()->filter('Email', $email)->first();
-
-        if (!$member) {
-            $result->addError('Email tidak ditemukan.');
-            return $result;
-        }
-
-        // Generate reset token
-        $resetToken = sha1(uniqid() . time());
-        $member->ResetPasswordToken = $resetToken;
-        $member->ResetPasswordExpiry = date('Y-m-d H:i:s', time() + 3600); // 1 jam
-        $member->write();
-
-        // Send reset email
-        $baseURL = Environment::getEnv('SS_BASE_URL');
-        $SiteConfig = SiteConfig::current_site_config();
-        $emails = explode(',', $SiteConfig->Email);
-        $CompanyEmail = trim($emails[0]);
-
-        $resetLink = rtrim($baseURL) . '/auth/reset-password?token=' . $resetToken;
-
-        $emailObj = \SilverStripe\Control\Email\Email::create()
-            ->setTo($email)
-            ->setFrom($CompanyEmail)
-            ->setSubject('Reset Password Anda')
-            ->setHTMLTemplate('CustomEmail')
-            ->setData([
-                'Name' => $member->FirstName,
-                'SenderEmail' => $email,
-                'MessageContent' => "
-                    Kami menerima permintaan untuk reset password akun Anda.
-                    Klik link berikut untuk reset password (berlaku 1 jam):
-                    {$resetLink}
-                    
-                    Jika Anda tidak meminta reset password, abaikan email ini.",
-                'SiteName' => $SiteConfig->Title,
-            ]);
-
-        $emailObj->send();
-
-        $result->addMessage('Link reset password telah dikirim ke email Anda.');
-        return $result;
-    }
-
-    private function processResetPassword(HTTPRequest $request, Member $member)
-    {
-        $password1 = $request->postVar('new_password_1');
-        $password2 = $request->postVar('new_password_2');
-
-        $result = ValidationResult::create();
-
-        if (!$password1 || !$password2) {
-            $result->addError('Password harus diisi.');
-            return $result;
-        }
-
-        if ($password1 !== $password2) {
-            $result->addError('Password tidak cocok.');
-            return $result;
-        }
-
-        if (strlen($password1) < 6) {
-            $result->addError('Password minimal 6 karakter.');
-            return $result;
-        }
-
-        // Update password dan hapus token
-        $member->changePassword($password1);
-        $member->ResetPasswordToken = null;
-        $member->ResetPasswordExpiry = null;
-        try {
-            $member->write();
-            $result->addMessage('Password berhasil direset.');
-        } catch (ValidationException $e) {
-            $result->addError('Password tidak valid atau sama dengan sebelumnya. Periksa kembali password baru Anda.');
-        }
-
-        return $result;
     }
 }
