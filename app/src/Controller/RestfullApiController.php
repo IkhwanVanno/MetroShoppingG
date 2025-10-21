@@ -73,6 +73,7 @@ class RestfullApiController extends Controller
     // ========== AUTHENTICATION ==========
     // * GOOGLE AUTH *
     // * Firebase *
+
     public function googleAuth(HTTPRequest $request)
     {
         if (!$request->isPOST()) {
@@ -155,14 +156,15 @@ class RestfullApiController extends Controller
         }
 
         Injector::inst()->get(IdentityStore::class)->logIn($member, false);
-        
+
         return $this->jsonResponse([
             'success' => true,
             'message' => 'Login berhasil',
             'user' => [
                 'id' => $member->ID,
                 'email' => $member->Email,
-                'nama' => $member->FirstName . ' ' . $member->Surname,
+                'first_name' => $member->FirstName,
+                'surname' => $member->Surname,
             ]
         ]);
     }
@@ -348,7 +350,6 @@ class RestfullApiController extends Controller
             return $this->jsonResponse(['error' => 'Password update failed'], 400);
         }
     }
-
 
     // ========== Feature/Methods Etc ==========
     public function forgotpassword(HTTPRequest $request)
