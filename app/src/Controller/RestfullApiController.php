@@ -25,6 +25,11 @@ class RestfullApiController extends Controller
         'forgotpassword',
         'member',
         'updatePassword',
+        'siteconfig',
+        'carousel',
+        'eventshop',
+        'flashsale',
+        'popupad',
     ];
 
     private static $url_handlers = [
@@ -35,6 +40,11 @@ class RestfullApiController extends Controller
         'forgotpassword' => 'forgotpassword',
         'member/password' => 'updatePassword',
         'member' => 'member',
+        'siteconfig' => 'siteconfig',
+        'carousel' => 'carousel',
+        'eventshop' => 'eventshop',
+        'flashsale' => 'flashsale',
+        'popupad' => 'popupad',
         '' => 'index',
     ];
 
@@ -62,6 +72,21 @@ class RestfullApiController extends Controller
                     'GET /api/member' => 'Get current member profile',
                     'PUT /api/member' => 'Update member profile',
                     'PUT /api/member/password' => 'Update member password',
+                ],
+                'siteconfig' => [
+                    'GET /api/siteconfig' => 'Get SiteConfig Data',
+                ],
+                'carousel' => [
+                    'GET /api/carousel' => 'Get Carousel Data',
+                ],
+                'eventshop' => [
+                    'GET /api/eventshop' => 'Get EventShop Data',
+                ],
+                'flashsale' => [
+                    'GET /api/flashsale' => 'Get FlashSale Data',
+                ],
+                'popupad' => [
+                    'GET /api/popupad' => 'Get PopUpAd Data'
                 ],
                 'forgotpassword' => [
                     'POST /api/forgotpassword' => 'Forgot password'
@@ -317,7 +342,7 @@ class RestfullApiController extends Controller
 
         return $this->jsonResponse(['error' => 'Method not allowed'], 405);
     }
-
+    
     public function updatePassword(HTTPRequest $request)
     {
         if (!$request->isPUT()) {
@@ -349,6 +374,161 @@ class RestfullApiController extends Controller
         } catch (ValidationException $e) {
             return $this->jsonResponse(['error' => 'Password update failed'], 400);
         }
+    }
+
+    // * SITECONFIG *
+    public function siteconfig(HTTPRequest $request)
+    {
+        if (!$request->isGET()) {
+            return $this->jsonResponse(['error' => 'Only Get method allowed'], status: 405);
+        }
+        $siteconfig = SiteConfig::current_site_config();
+        if (!$siteconfig) {
+            return $this->jsonResponse(['error' => 'SiteConfig not found'], status: 404);
+        }
+
+        return $this->jsonResponse([
+            'success' => true,
+            'data' => [
+                "email" => $siteconfig->Email,
+                "phone" => $siteconfig->Phone,
+                "address" => $siteconfig->Address,
+                "company_province_id" => $siteconfig->CompanyProvinceID,
+                "company_province_name" => $siteconfig->CompanyProvinceName,
+                "company_city_id" => $siteconfig->CompanyCityID,
+                "company_city_name" => $siteconfig->CompanyCityName,
+                "company_distric_id" => $siteconfig->CompanyDistricID,
+                "company_distric_name" => $siteconfig->CompanyDistrictName,
+                "company_postal_code" => $siteconfig->CompanyPostalCode,
+                "credit" => $siteconfig->Credit,
+                "about_title" => $siteconfig->AboutTitle,
+                "about_description" => $siteconfig->AboutDescription,
+                "sub_about1_title" => $siteconfig->SubAbout1Title,
+                "sub_about1_description" => $siteconfig->SubAbout1Description,
+                "sub_about2_title" => $siteconfig->SubAbout2Title,
+                "sub_about2_description" => $siteconfig->SubAbout2Description,
+                "sub_about3_title" => $siteconfig->SubAbout2Title,
+                "sub_about3_description" => $siteconfig->SubAbout3Description,
+                "sub_about4_title" => $siteconfig->SubAbout3Title,
+                "sub_about4_description" => $siteconfig->SubAbout4Description,
+                "favicon_url" => $siteconfig->favicon()->getAbsoluteURL(),
+                "logo_url" => $siteconfig->logo()->getAbsoluteURL(),
+            ]
+        ]);
+    }
+
+    // * CAROUSEL *
+    public function carousel(HTTPRequest $request)
+    {
+        if (!$request->isGET()) {
+            return $this->jsonResponse(['error' => 'Only Get method allowed'], status: 405);
+        }
+
+        $carouselList = CarouselImage::get();
+        if ($carouselList->count() == 0) {
+            return $this->jsonResponse(['error' => 'Carousel not found'], 404);
+        }
+
+        $data = [];
+        foreach ($carouselList as $carousel) {
+            $data[] = [
+                "name" => $carousel->Name,
+                "link" => $carousel->Link,
+                "image_url" => $carousel->Image()->exists() ? $carousel->Image()->getAbsoluteURL() : null,
+            ];
+        }
+
+        return $this->jsonResponse([
+            'success' => true,
+            'data' => $data
+        ]);
+    }
+
+    // * EVENTSHOP *
+    public function eventshop(HTTPRequest $request)
+    {
+        if (!$request->isGET()) {
+            return $this->jsonResponse(['error' => 'Only Get method allowed'], 405);
+        }
+
+        $eventShopList = EventShop::get();
+        if ($eventShopList->count() == 0) {
+            return $this->jsonResponse(['error' => 'EventShop not found'], 404);
+        }
+        $data = [];
+        foreach ($eventShopList as $eventShop) {
+            $data[] = [
+                'name' => $eventShop->Name,
+                'description' => $eventShop->Description,
+                'link_url' => $eventShop->Link,
+                'start_date' => $eventShop->StartDate,
+                'end_date' => $eventShop->EndDate,
+                'image_url' => $eventShop->Image() ? $eventShop->Image()->getAbsoluteURL() : null,
+            ];
+        }
+
+        return $this->jsonResponse([
+            'success' => true,
+            'data' => $data,
+        ]);
+
+    }
+
+    // * FLASHSALE *
+    public function flashsale(HTTPRequest $request)
+    {
+        if (!$request->isGET()) {
+            return $this->jsonResponse(['error' => 'Only Get method allowed'], 405);
+        }
+
+        $flashSaleList = FlashSale::get();
+        if ($flashSaleList->count() == 0) {
+            return $this->jsonResponse(['error' => 'FlashSale not found'], 404);
+        }
+        $data = [];
+        foreach ($flashSaleList as $flashSale) {
+            $data[] = [
+                'name' => $flashSale->Name,
+                'description' => $flashSale->Description,
+                'start_time' => $flashSale->Start_time,
+                'end_time' => $flashSale->End_time,
+                'discount_flash_sale' => $flashSale->DiscountFlashSale,
+                'status' => $flashSale->Status,
+            ];
+        }
+
+        return $this->jsonResponse([
+            'success' => true,
+            'data' => $data,
+        ]);
+    }
+
+    // * POPUP AD *
+    public function popupad(HTTPRequest $request)
+    {
+        if (!$request->isGET()) {
+            return $this->jsonResponse(['error' => 'Only Get method allowed'], 405);
+        }
+
+        $popUpAdList = PopupAd::get();
+        if ($popUpAdList->count() == 0) {
+            return $this->jsonResponse(['error' => 'PopUpAd not found'], 404);
+        }
+        $data = [];
+        foreach ($popUpAdList as $popUpAd) {
+            $data[] = [
+                'title' => $popUpAd->Title,
+                'link_url' => $popUpAd->Link,
+                'active' => $popUpAd->Active,
+                'sort_order' => $popUpAd->SortOrder,
+                'image_url' => $popUpAd->Image() ? $popUpAd->Image()->getAbsoluteURL() : null,
+            ];
+        }
+
+        return $this->jsonResponse([
+            'success' => true,
+            'data' => $data,
+        ]);
     }
 
     // ========== Feature/Methods Etc ==========

@@ -16,8 +16,11 @@ class CustomSiteConfig extends DataExtension
         "Phone" => "Varchar(20)",
         "Address" => "Text",
         "CompanyProvinceID" => "Int",
+        "CompanyProvinceName" => "Varchar(255)",
         "CompanyCityID" => "Int",
+        "CompanyCityName" => "Varchar(255)",
         "CompanyDistricID" => "Int",
+        "CompanyDistrictName" => "Varchar(255)",
         "CompanyPostalCode" => "Int",
         "Credit" => "Varchar(255)",
         "AboutTitle" => "Varchar(255)",
@@ -39,6 +42,47 @@ class CustomSiteConfig extends DataExtension
         "favicon",
         "logo",
     ];
+
+    public function onBeforeWrite()
+    {
+        parent::onBeforeWrite();
+
+        $rajaOngkir = new RajaOngkirService();
+
+        // Cek dan isi nama provinsi
+        if ($this->owner->CompanyProvinceID) {
+            $provinces = $rajaOngkir->getProvinces();
+            foreach ($provinces as $province) {
+                if ($province['id'] == $this->owner->CompanyProvinceID) {
+                    $this->owner->CompanyProvinceName = $province['name'];
+                    break;
+                }
+            }
+        }
+
+        // Cek dan isi nama kota
+        if ($this->owner->CompanyCityID && $this->owner->CompanyProvinceID) {
+            $cities = $rajaOngkir->getCities($this->owner->CompanyProvinceID);
+            foreach ($cities as $city) {
+                if ($city['id'] == $this->owner->CompanyCityID) {
+                    $this->owner->CompanyCityName = $city['name'];
+                    break;
+                }
+            }
+        }
+
+        // Cek dan isi nama kecamatan
+        if ($this->owner->CompanyDistricID && $this->owner->CompanyCityID) {
+            $districts = $rajaOngkir->getDistricts($this->owner->CompanyCityID);
+            foreach ($districts as $district) {
+                if ($district['id'] == $this->owner->CompanyDistricID) {
+                    $this->owner->CompanyDistrictName = $district['name'];
+                    break;
+                }
+            }
+        }
+    }
+
 
     public function updateCMSFields(FieldList $fields)
     {
@@ -77,7 +121,8 @@ class CustomSiteConfig extends DataExtension
         ]);
 
         // Add JavaScript for cascading dropdowns
-        $fields->addFieldToTab('Root.Main', 
+        $fields->addFieldToTab(
+            'Root.Main',
             \SilverStripe\Forms\LiteralField::create('AddressScript', $this->getAddressScript())
         );
     }
@@ -87,12 +132,12 @@ class CustomSiteConfig extends DataExtension
         try {
             $rajaOngkir = new RajaOngkirService();
             $provinces = $rajaOngkir->getProvinces();
-            
+
             $options = [];
             foreach ($provinces as $province) {
                 $options[$province['id']] = $province['name'];
             }
-            
+
             return $options;
         } catch (Exception $e) {
             return [];
@@ -108,12 +153,12 @@ class CustomSiteConfig extends DataExtension
         try {
             $rajaOngkir = new RajaOngkirService();
             $cities = $rajaOngkir->getCities($this->owner->CompanyProvinceID);
-            
+
             $options = [];
             foreach ($cities as $city) {
                 $options[$city['id']] = $city['name'];
             }
-            
+
             return $options;
         } catch (Exception $e) {
             return [];
@@ -129,12 +174,12 @@ class CustomSiteConfig extends DataExtension
         try {
             $rajaOngkir = new RajaOngkirService();
             $districts = $rajaOngkir->getDistricts($this->owner->CompanyCityID);
-            
+
             $options = [];
             foreach ($districts as $district) {
                 $options[$district['id']] = $district['name'];
             }
-            
+
             return $options;
         } catch (Exception $e) {
             return [];
