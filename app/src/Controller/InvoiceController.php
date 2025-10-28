@@ -145,7 +145,7 @@ class InvoiceController extends PageController
     /**
      * Generate PDF content from template
      */
-    private function generatePDFContent($order)
+    public function generatePDFContent($order)
     {
         $data = $this->prepareInvoiceData($order);
         $template = $this->customise($data)->renderWith('InvoicePDF');

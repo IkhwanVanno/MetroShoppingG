@@ -62,12 +62,13 @@ class RestfullApiController extends Controller
         'orderDetail',
         'createOrder',
         'cancelOrder',
+        'markAsCompleted',
         // Payment
         'initiatePayment',
         'paymentCallback',
         'paymentMethods',
         // Review
-        'addReview',
+        'submitReview',
         'productReviews',
         // Membership
         'membershipInfo',
@@ -117,6 +118,7 @@ class RestfullApiController extends Controller
         'shipping/districts/$ID!' => 'districts',
         'shipping/check-ongkir' => 'checkOngkir',
         // Order
+        'orders/complete/$ID!' => 'markAsCompleted',
         'orders/create' => 'createOrder',
         'orders/cancel/$ID!' => 'cancelOrder',
         'orders/$ID!' => 'orderDetail',
@@ -126,7 +128,7 @@ class RestfullApiController extends Controller
         'payment/callback' => 'paymentCallback',
         'payment/methods' => 'paymentMethods',
         // Review
-        'reviews/add' => 'addReview',
+        'reviews/submit' => 'submitReview',
         'reviews/product/$ID!' => 'productReviews',
         // Membership
         'membership/info' => 'membershipInfo',
@@ -205,6 +207,7 @@ class RestfullApiController extends Controller
                     'GET /api/orders/{id}' => 'Get order detail',
                     'POST /api/orders/create' => 'Create new order',
                     'POST /api/orders/cancel/{id}' => 'Cancel order',
+                    'POST /api/orders/complete/{id}' => 'Mark As Complete order',
                 ],
                 'payment' => [
                     'GET /api/payment/methods' => 'Get payment methods',
@@ -212,7 +215,7 @@ class RestfullApiController extends Controller
                     'POST /api/payment/callback' => 'Payment callback (webhook)',
                 ],
                 'review' => [
-                    'POST /api/reviews/add' => 'Add product review',
+                    'POST /api/reviews/submit' => 'Submit product review',
                     'GET /api/reviews/product/{product_id}' => 'Get product reviews',
                 ],
                 'membership' => [
@@ -1950,6 +1953,38 @@ class RestfullApiController extends Controller
             'message' => 'Order cancelled successfully'
         ]);
     }
+    public function markAsCompleted(HTTPRequest $request)
+    {
+        if (!$request->isPOST()) {
+            return $this->jsonResponse(['error' => 'Only POST method allowed'], 405);
+        }
+
+        $member = $this->requireAuth();
+        if ($member instanceof HTTPResponse)
+            return $member;
+
+        $orderID = $request->param('ID');
+
+        $order = Order::get()->filter([
+            'ID' => $orderID,
+            'MemberID' => $member->ID
+        ])->first();
+
+        if (!$order) {
+            return $this->jsonResponse(['error' => 'Order not found'], 404);
+        }
+
+        if ($order->markAsCompleted()) {
+            return $this->jsonResponse([
+                'success' => true,
+                'message' => 'Order marked as completed successfully'
+            ]);
+        }
+
+        return $this->jsonResponse([
+            'error' => 'Order cannot be marked as completed'
+        ], 400);
+    }
 
     // ========== PAYMENT MANAGEMENT ==========
     public function paymentMethods(HTTPRequest $request)
@@ -2119,7 +2154,7 @@ class RestfullApiController extends Controller
     }
 
     // ========== REVIEW MANAGEMENT ==========
-    public function addReview(HTTPRequest $request)
+    public function submitReview(HTTPRequest $request)
     {
         if (!$request->isPOST()) {
             return $this->jsonResponse(['error' => 'Only POST method allowed'], 405);
@@ -2131,34 +2166,67 @@ class RestfullApiController extends Controller
 
         $data = json_decode($request->getBody(), true);
 
-        if (!isset($data['order_item_id']) || !isset($data['rating']) || !isset($data['message'])) {
-            return $this->jsonResponse(['error' => 'order_item_id, rating, and message are required'], 400);
+        // Validasi input
+        if (
+            !isset($data['order_id']) || !isset($data['order_item_id']) ||
+            !isset($data['rating']) || !isset($data['message'])
+        ) {
+            return $this->jsonResponse([
+                'error' => 'order_id, order_item_id, rating, and message are required'
+            ], 400);
         }
 
+        $orderID = (int) $data['order_id'];
         $orderItemID = (int) $data['order_item_id'];
         $rating = (int) $data['rating'];
-        $message = $data['message'];
+        $message = trim($data['message']);
         $showName = $data['show_name'] ?? true;
 
+        // Validasi rating
         if ($rating < 1 || $rating > 5) {
             return $this->jsonResponse(['error' => 'Rating must be between 1 and 5'], 400);
         }
 
-        $orderItem = OrderItem::get()->byID($orderItemID);
+        // Validasi message
+        if (strlen($message) < 5) {
+            return $this->jsonResponse(['error' => 'Review message must be at least 5 characters'], 400);
+        }
+
+        // Cek order ownership dan status
+        $order = Order::get()->filter([
+            'ID' => $orderID,
+            'MemberID' => $member->ID
+        ])->first();
+
+        if (!$order) {
+            return $this->jsonResponse(['error' => 'Order not found'], 404);
+        }
+
+        if ($order->Status != 'completed') {
+            return $this->jsonResponse(['error' => 'Order must be completed before reviewing'], 400);
+        }
+
+        // Cek order item
+        $orderItem = OrderItem::get()->filter([
+            'ID' => $orderItemID,
+            'OrderID' => $orderID
+        ])->first();
 
         if (!$orderItem) {
             return $this->jsonResponse(['error' => 'Order item not found'], 404);
         }
 
-        $order = $orderItem->Order();
-        if ($order->MemberID != $member->ID) {
-            return $this->jsonResponse(['error' => 'Unauthorized'], 403);
+        // Cek apakah sudah direview
+        if ($orderItem->hasReview()) {
+            return $this->jsonResponse(['error' => 'This item has already been reviewed'], 400);
         }
 
+        // Cek apakah bisa direview
         if (!$orderItem->canBeReviewed()) {
             return $this->jsonResponse(['error' => 'This item cannot be reviewed'], 400);
         }
 
+        // Buat review
         $review = Review::create();
         $review->ProductID = $orderItem->ProductID;
         $review->MemberID = $member->ID;
@@ -2170,9 +2238,11 @@ class RestfullApiController extends Controller
 
         return $this->jsonResponse([
             'success' => true,
-            'message' => 'Review added successfully',
+            'message' => 'Review submitted successfully',
             'data' => [
-                'review_id' => $review->ID
+                'review_id' => $review->ID,
+                'product_id' => $review->ProductID,
+                'rating' => $review->Rating
             ]
         ], 201);
     }
