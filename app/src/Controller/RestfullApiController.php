@@ -738,6 +738,7 @@ class RestfullApiController extends Controller
                 'discount_flash_sale' => (float) $flashSale->DiscountFlashSale,
                 'status' => $flashSale->Status,
                 'timer_status' => $flashSale->getTimerStatus(),
+                'image_url' => $flashSale->Image() ? $flashSale->Image()->getAbsoluteURL() : null,
             ];
         }
 
