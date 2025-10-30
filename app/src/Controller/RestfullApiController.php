@@ -1317,6 +1317,7 @@ class RestfullApiController extends Controller
                 'product_name' => $product->Name,
                 'price' => (float) $product->getDisplayPriceValue(),
                 'original_price' => (float) $product->Price,
+                'description' => $product->Description,
                 'stock' => $product->Stok,
                 'rating' => $product->getAverageRating(),
                 'has_flashsale' => $product->hasActiveFlashSale(),
