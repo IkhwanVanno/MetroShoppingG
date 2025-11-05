@@ -1090,6 +1090,7 @@ class RestfullApiController extends Controller
                 'quantity' => $item->Quantity,
                 'price' => (float) $product->getDisplayPriceValue(),
                 'original_price' => (float) $product->Price,
+                'description' => $product->Description,
                 'subtotal' => (float) $item->getSubtotal(),
                 'original_subtotal' => (float) $item->getOriginalSubtotal(),
                 'product_discount' => (float) $item->getProductDiscountTotal(),
@@ -1097,6 +1098,7 @@ class RestfullApiController extends Controller
                 'weight' => $product->Weight,
                 'total_weight' => $product->Weight * $item->Quantity,
                 'stock' => $product->Stok,
+                'rating' => $product->getAverageRating(),
                 'image_url' => $product->Image()->exists() ? $product->Image()->getAbsoluteURL() : null,
             ];
 
