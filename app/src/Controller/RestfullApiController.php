@@ -648,6 +648,7 @@ class RestfullApiController extends Controller
         if ($eventShopList->count() == 0) {
             return $this->jsonResponse(['error' => 'EventShop not found'], 404);
         }
+
         $data = [];
         foreach ($eventShopList as $eventShop) {
             $data[] = [
@@ -665,7 +666,6 @@ class RestfullApiController extends Controller
             'success' => true,
             'data' => $data,
         ]);
-
     }
     public function eventshop(HTTPRequest $request)
     {
@@ -683,7 +683,7 @@ class RestfullApiController extends Controller
             return $this->jsonResponse(['error' => 'EventShop not found'], 404);
         }
 
-        // Ambil produk
+        // Ambil produk dengan relasi yang benar
         $products = $eventShop->Product();
         $productList = [];
 
@@ -691,9 +691,21 @@ class RestfullApiController extends Controller
             $productList[] = [
                 'id' => $product->ID,
                 'name' => $product->Name,
+                'description' => $product->Description,
+                'original_price' => (float) $product->Price,
+                'price_after_product_discount' => (float) ($product->hasDiscount()
+                    ? $product->Price - $product->DiscountPrice
+                    : $product->Price),
                 'price_after_all_discount' => (float) $product->getDisplayPriceValue(),
+                'product_discount_percentage' => $product->hasDiscount()
+                    ? round(($product->DiscountPrice / $product->Price) * 100, 2)
+                    : 0,
+                'flashsale_discount_percentage' => $product->getFlashSaleDiscountPercentage(),
+                'has_flashsale' => $product->hasActiveFlashSale(),
+                'flashsale_name' => $product->FlashSale()->exists() ? $product->FlashSale()->Name : null,
                 'stock' => $product->Stok,
                 'category' => $product->Category()->Name ?? null,
+                'rating' => $product->getAverageRating(),
                 'image_url' => $product->Image()->exists() ? $product->Image()->getAbsoluteURL() : null,
             ];
         }
@@ -706,7 +718,7 @@ class RestfullApiController extends Controller
             'start_date' => $eventShop->StartDate,
             'end_date' => $eventShop->EndDate,
             'image_url' => $eventShop->Image() ? $eventShop->Image()->getAbsoluteURL() : null,
-            'productList' => $productList,
+            'products' => $productList,
         ];
 
         return $this->jsonResponse([
@@ -763,7 +775,7 @@ class RestfullApiController extends Controller
             return $this->jsonResponse(['error' => 'FlashSale not found'], 404);
         }
 
-        // Ambil produk
+        // Ambil produk dengan relasi yang benar
         $products = $flashSale->Product();
         $productList = [];
 
@@ -771,9 +783,21 @@ class RestfullApiController extends Controller
             $productList[] = [
                 'id' => $product->ID,
                 'name' => $product->Name,
+                'description' => $product->Description,
+                'original_price' => (float) $product->Price,
+                'price_after_product_discount' => (float) ($product->hasDiscount()
+                    ? $product->Price - $product->DiscountPrice
+                    : $product->Price),
                 'price_after_all_discount' => (float) $product->getDisplayPriceValue(),
+                'product_discount_percentage' => $product->hasDiscount()
+                    ? round(($product->DiscountPrice / $product->Price) * 100, 2)
+                    : 0,
+                'flashsale_discount_percentage' => $product->getFlashSaleDiscountPercentage(),
+                'has_flashsale' => $product->hasActiveFlashSale(),
+                'flashsale_name' => $flashSale->Name,
                 'stock' => $product->Stok,
                 'category' => $product->Category()->Name ?? null,
+                'rating' => $product->getAverageRating(),
                 'image_url' => $product->Image()->exists() ? $product->Image()->getAbsoluteURL() : null,
             ];
         }
@@ -787,6 +811,7 @@ class RestfullApiController extends Controller
             'discount_flash_sale' => (float) $flashSale->DiscountFlashSale,
             'status' => $flashSale->Status,
             'timer_status' => $flashSale->getTimerStatus(),
+            'image_url' => $flashSale->Image() ? $flashSale->Image()->getAbsoluteURL() : null,
             'products' => $productList,
         ];
 
@@ -795,7 +820,6 @@ class RestfullApiController extends Controller
             'data' => $data,
         ]);
     }
-
     // *  CATEGORY * 
     public function category(HTTPRequest $request)
     {
