@@ -553,6 +553,7 @@ class RestfullApiController extends Controller
         return $this->jsonResponse([
             'success' => true,
             'data' => [
+                "title" => $siteconfig->Title,
                 "email" => $siteconfig->Email,
                 "phone" => $siteconfig->Phone,
                 "address" => $siteconfig->Address,
