@@ -30,12 +30,12 @@ Salin file `.env.example` menjadi `.env` lalu isi seperti berikut:
 SS_ENVIRONMENT_TYPE="dev"
 
 # Base URL
-SS_BASE_URL="http://localhost/namaproject"
+SS_BASE_URL=""
 
 # Database
 SS_DATABASE_CLASS="MySQLDatabase"
 SS_DATABASE_SERVER="127.0.0.1"
-SS_DATABASE_NAME="namadatabase"
+SS_DATABASE_NAME="metroshoppingg"
 SS_DATABASE_USERNAME="root"
 SS_DATABASE_PASSWORD=""
 
@@ -46,14 +46,18 @@ SS_DEFAULT_ADMIN_PASSWORD="password"
 # Mailer
 MAILER_DSN=""
 
+# Google OAuth
+GOOGLE_CLIENT_ID=""
+GOOGLE_CLIENT_SECRET=""
+
 # API RajaOngkir
-RAJAONGKIR_API_KEY=""
+RAJAONGKIR_API_KEY=
 
 # API Duitku (Sandbox)
-DUITKU_MERCHANT_CODE=""
-DUITKU_API_KEY=""
-DUITKU_GETPAYMENTMETHOD_URL=""
-DUITKU_BASE_URL=""
+DUITKU_MERCHANT_CODE=
+DUITKU_API_KEY=
+DUITKU_GETPAYMENTMETHOD_URL=
+DUITKU_BASE_URL=
 
 # Mixed Content Fix
 SS_TRUSTED_PROXY_IPS="*"
